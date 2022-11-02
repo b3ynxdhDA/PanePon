@@ -4,13 +4,20 @@ using UnityEngine;
 
 public class PaneponPanel : MonoBehaviour
 {
-    // Start is called before the first frame update
+    //メインのMeshRenderer
+    [SerializeField] private MeshRenderer _meshRenderer = null;
+
+    public MeshRenderer meshRenderer { get { return _meshRenderer; } set { _meshRenderer = value; } }
+
+    //パネルの状態
+    private PaneponSystem.PanelState _state = PaneponSystem.PanelState.Stable;
+
     void Start()
     {
         
     }
 
-    // Update is called once per frame
+
     void Update()
     {
         

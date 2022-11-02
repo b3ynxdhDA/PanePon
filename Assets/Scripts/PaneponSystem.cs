@@ -9,11 +9,15 @@ public class PaneponSystem : MonoBehaviour
     const int FIELD_SIZE_Y_BASE = 12;
     const int FIELD_SIZE_Y = 24;
 
-    //パネルのプレハブ
-    [SerializeField] private List<GameObject> _panelPrefabList = new List<GameObject>();
+    //パネルのプレハブのもと
+    [SerializeField] private PaneponPanel _panelPurefab = null;
+
+    //パネルのテクスチャを設定する用
+    [SerializeField] private List<Texture> _panelTextureList = new List<Texture>();
+
 
     //パネルの色
-    enum PanelColor
+    public enum PanelColor
     {
         Red,
         Blue,
@@ -26,7 +30,7 @@ public class PaneponSystem : MonoBehaviour
     };
 
     //パネルの状態
-    enum PanelState
+    public enum PanelState
     {
         Stable,  //停止中
         Swap,    //入れ替え中
@@ -36,10 +40,44 @@ public class PaneponSystem : MonoBehaviour
         Max
     };
 
+    //パネルのpurefabのリスト
+    private List<PaneponPanel> _panelPrefabList = new List<PaneponPanel>((int)PanelColor.Max);
+
+    //マテリアルのリスト
+    private List<Material> _panelMaterialList = new List<Material>((int)PanelColor.Max);
+
+    //フィールド上にあるパネルの状態
+    private PanelState[,] _fieldPanelsState = new PanelState[FIELD_SIZE_Y,FIELD_SIZE_X];
+
+    //影響しているパネルへの参照
+    private PaneponPanel[,] _fieldPanels = new PaneponPanel[FIELD_SIZE_Y,FIELD_SIZE_X];
+    
     #endregion
     void Start()
     {
-        
+
+        //インデックスのエラーナウ
+        print(_panelPrefabList);
+        //プレハブとマテリアルを用意する
+        for(int i = 0; i < _panelTextureList.Count; i++)
+        {
+            _panelPrefabList[i] = GameObject.Instantiate<PaneponPanel>(_panelPurefab);
+            _panelMaterialList[i] = GameObject.Instantiate<Material>(_panelPrefabList[i].meshRenderer.material);
+            _panelPrefabList[i].meshRenderer.material = _panelMaterialList[i];
+            _panelMaterialList[i].mainTexture = _panelTextureList[i];
+        }
+
+        //初期状態のパネルの配置
+        for (int i = 0; i < FIELD_SIZE_Y_BASE / 2; i++)
+        {
+            for(int j = 0;j < FIELD_SIZE_X; j++)
+            {
+                //パネルの実体
+                PaneponPanel newPanel = GameObject.Instantiate<PaneponPanel>(_panelPrefabList[Random.Range(0,_panelPrefabList.Count)]);
+                newPanel.transform.localPosition = new Vector3(j, i, 0f);
+                _fieldPanels[i, j] = newPanel;
+            }
+        }
     }
 
     void Update()
