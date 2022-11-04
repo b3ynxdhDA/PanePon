@@ -15,6 +15,8 @@ public class PaneponSystem : MonoBehaviour
     //パネルのテクスチャを設定する用
     [SerializeField] private List<Texture> _panelTextureList = new List<Texture>();
 
+    //カーソルのプレハブ
+    [SerializeField] private GameObject _cursorPrefab = null;
 
     //パネルの色
     public enum PanelColor
@@ -51,18 +53,29 @@ public class PaneponSystem : MonoBehaviour
 
     //影響しているパネルへの参照
     private PaneponPanel[,] _fieldPanels = new PaneponPanel[FIELD_SIZE_Y,FIELD_SIZE_X];
-    
+
+    //カーソル
+    private GameObject _cursolL = null;
+    private GameObject _cursolR = null;
+
+    //カーソル位置
+    private int _corsorPosX = 0;
+    private int _corsorPosY = 0;
+
     #endregion
     void Start()
     {
-
-        //インデックスのエラーナウ
-        print(_panelPrefabList);
         //プレハブとマテリアルを用意する
         for(int i = 0; i < _panelTextureList.Count; i++)
         {
+            /*
             _panelPrefabList[i] = GameObject.Instantiate<PaneponPanel>(_panelPurefab);
             _panelMaterialList[i] = GameObject.Instantiate<Material>(_panelPrefabList[i].meshRenderer.material);
+            _panelPrefabList[i].meshRenderer.material = _panelMaterialList[i];
+            _panelMaterialList[i].mainTexture = _panelTextureList[i];
+            */
+            _panelPrefabList.Add(GameObject.Instantiate<PaneponPanel>(_panelPurefab));
+            _panelMaterialList.Add(GameObject.Instantiate<Material>(_panelPrefabList[i].meshRenderer.material));
             _panelPrefabList[i].meshRenderer.material = _panelMaterialList[i];
             _panelMaterialList[i].mainTexture = _panelTextureList[i];
         }
@@ -78,10 +91,50 @@ public class PaneponSystem : MonoBehaviour
                 _fieldPanels[i, j] = newPanel;
             }
         }
+
+        //カーソルの用意
+        _cursolL = GameController.Instantiate<GameObject>(_cursorPrefab);
+        _cursolR = GameController.Instantiate<GameObject>(_cursorPrefab);
+
+        //カーソルの初期位置を設定
+        MoveCursor(0, 4);
     }
 
     void Update()
     {
-        
+        //カーソル移動処理
+        int deltaY = 0;
+        int deltaX = 0;
+        //if(Input.GetKeyDown(KeyCode.W))
+        if(Input.GetButtonDown("Up"))
+        {
+            deltaY++;
+        }
+        if(Input.GetButtonDown("Down"))
+        {
+            deltaY--;
+        }
+        if(Input.GetButtonDown("Right"))
+        {
+            deltaX++;
+        }
+        if(Input.GetButtonDown("Left"))
+        {
+            deltaX--;
+        }
+        _corsorPosX = Mathf.Clamp(_corsorPosX + deltaX, 0, 4);
+        _corsorPosY = Mathf.Clamp(_corsorPosY + deltaY, 0, 12);
+        MoveCursor(_corsorPosX, _corsorPosY);
     }
+
+    #region メソッド
+    /// <summary>
+    /// カーソル移動
+    /// </summary>    
+    void MoveCursor(int leftX, int leftY)
+    {
+        _cursolL.transform.localPosition = new Vector3(leftX, leftY, 0f);
+        _cursolR.transform.localPosition = new Vector3(leftX + 1, leftY, 0f);
+    }
+    #endregion
 }
