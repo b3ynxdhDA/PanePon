@@ -1,10 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PaneponSystem : MonoBehaviour
 {
     #region 変数
+    //インプットシステム
+    InputSystem _inputSystem;
+
     const int FIELD_SIZE_X = 6;
     const int FIELD_SIZE_Y_BASE = 12;
     const int FIELD_SIZE_Y = 24;
@@ -63,17 +67,17 @@ public class PaneponSystem : MonoBehaviour
     private int _corsorPosY = 0;
 
     #endregion
+    private void Awake()
+    {
+        _inputSystem = new InputSystem();
+        _inputSystem.Enable();
+    }
+
     void Start()
     {
         //プレハブとマテリアルを用意する
         for(int i = 0; i < _panelTextureList.Count; i++)
         {
-            /*
-            _panelPrefabList[i] = GameObject.Instantiate<PaneponPanel>(_panelPurefab);
-            _panelMaterialList[i] = GameObject.Instantiate<Material>(_panelPrefabList[i].meshRenderer.material);
-            _panelPrefabList[i].meshRenderer.material = _panelMaterialList[i];
-            _panelMaterialList[i].mainTexture = _panelTextureList[i];
-            */
             _panelPrefabList.Add(GameObject.Instantiate<PaneponPanel>(_panelPurefab));
             _panelMaterialList.Add(GameObject.Instantiate<Material>(_panelPrefabList[i].meshRenderer.material));
             _panelPrefabList[i].meshRenderer.material = _panelMaterialList[i];
@@ -93,8 +97,8 @@ public class PaneponSystem : MonoBehaviour
         }
 
         //カーソルの用意
-        _cursolL = GameController.Instantiate<GameObject>(_cursorPrefab);
-        _cursolR = GameController.Instantiate<GameObject>(_cursorPrefab);
+        _cursolL = GameObject.Instantiate<GameObject>(_cursorPrefab);
+        _cursolR = GameObject.Instantiate<GameObject>(_cursorPrefab);
 
         //カーソルの初期位置を設定
         MoveCursor(0, 4);
@@ -105,26 +109,30 @@ public class PaneponSystem : MonoBehaviour
         //カーソル移動処理
         int deltaY = 0;
         int deltaX = 0;
-        //if(Input.GetKeyDown(KeyCode.W))
-        if(Input.GetButtonDown("Up"))
+
+        if (_inputSystem.Player.Up.triggered)
         {
             deltaY++;
         }
-        if(Input.GetButtonDown("Down"))
+        if(_inputSystem.Player.Down.triggered)
         {
             deltaY--;
         }
-        if(Input.GetButtonDown("Right"))
+        if(_inputSystem.Player.Right.triggered)
         {
             deltaX++;
         }
-        if(Input.GetButtonDown("Left"))
+        if(_inputSystem.Player.Left.triggered)
         {
             deltaX--;
         }
         _corsorPosX = Mathf.Clamp(_corsorPosX + deltaX, 0, 4);
         _corsorPosY = Mathf.Clamp(_corsorPosY + deltaY, 0, 12);
         MoveCursor(_corsorPosX, _corsorPosY);
+
+        //パネル入れ替え処理
+
+
     }
 
     #region メソッド
