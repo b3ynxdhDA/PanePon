@@ -35,12 +35,17 @@ public class PaneponSystem : MonoBehaviour
         Max
     };
 
-    //パネルの状態
+    /// <summary>
+    /// パネルのステート
+    /// None:パネル無し Stable:停止中 Swap:入れ替え中 Flash:発光中 Erase:消滅中 Fall:落下中
+    /// </summary>
     public enum PanelState
     {
+        None,    //パネル無し
         Stable,  //停止中
         Swap,    //入れ替え中
-        Chain,   //連鎖中
+        Flash,   //発光中
+        Erase,   //消滅中
         Fall,    //落下中
 
         Max
@@ -91,7 +96,8 @@ public class PaneponSystem : MonoBehaviour
             {
                 //パネルの実体
                 PaneponPanel newPanel = GameObject.Instantiate<PaneponPanel>(_panelPrefabList[Random.Range(0,_panelPrefabList.Count)]);
-                newPanel.transform.localPosition = new Vector3(j, i, 0f);
+                //newPanel.transform.localPosition = new Vector3(j, i, 0f); 下のメソッドで置き換え
+                newPanel.SetPosition(j, i);
                 _fieldPanels[i, j] = newPanel;
             }
         }
@@ -131,7 +137,16 @@ public class PaneponSystem : MonoBehaviour
         MoveCursor(_corsorPosX, _corsorPosY);
 
         //パネル入れ替え処理
+        if (_inputSystem.Player.Swap.triggered)
+        {
+            _fieldPanels[_corsorPosY, _corsorPosX].Swap(_corsorPosX + 1, _corsorPosY);
+            _fieldPanels[_corsorPosY, _corsorPosX + 1].Swap(_corsorPosX, _corsorPosY);
 
+            //入れ替え
+            PaneponPanel tmp = _fieldPanels[_corsorPosY, _corsorPosX];
+            _fieldPanels[_corsorPosY, _corsorPosX] = _fieldPanels[_corsorPosY, _corsorPosX + 1];
+            _fieldPanels[_corsorPosY, _corsorPosX + 1] = tmp;
+        }
 
     }
 
@@ -143,6 +158,50 @@ public class PaneponSystem : MonoBehaviour
     {
         _cursolL.transform.localPosition = new Vector3(leftX, leftY, 0f);
         _cursolR.transform.localPosition = new Vector3(leftX + 1, leftY, 0f);
+    }
+    /// <summary>
+    /// 消せるパネルがあるかの判定
+    /// </summary>
+    void CheckErase()
+    {
+        for (int i = 0; i < FIELD_SIZE_Y / 2; i++)
+        {
+            for (int j = 0; j < FIELD_SIZE_X; j++)
+            {
+                //パネルの実体
+                PanelColor baseColor =  _fieldPanels[i, j].color;
+            }
+        }
+    }
+    /// <summary>
+    /// 右方向にそろっているか
+    /// </summary>
+    /// <param name="_x"></param>
+    /// <param name="_y"></param>
+    /// <returns>そろっている数</returns>
+    bool CheckSameColorHorizontal(int _x, int _y)
+    {
+        PanelColor baseColor = GetColor(_x, _y);
+        return (baseColor == GetColor(_x + 1, _y) && baseColor == GetColor(_x + 2, _y));
+    } 
+    /// <summary>
+    /// 縦方向にそろっているか
+    /// </summary>
+    /// <param name="_x"></param>
+    /// <param name="_y"></param>
+    /// <returns>そろっている数</returns>
+    bool CheckSameColorVartical(int _x, int _y)
+    {
+        PanelColor baseColor = GetColor(_x, _y);
+        return (baseColor == GetColor(_x + 1, _y) && baseColor == GetColor(_x + 2, _y));
+    }
+    PanelColor GetColor(int _x, int _y)
+    {
+        if(_x < 0 || FIELD_SIZE_X <= _x || _y < 0 || FIELD_SIZE_Y <= _y)
+        {
+            return PanelColor.Max;
+        }
+        return _fieldPanels[_x, _y].color;
     }
     #endregion
 }
