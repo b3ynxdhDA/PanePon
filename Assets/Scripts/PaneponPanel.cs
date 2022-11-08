@@ -12,6 +12,7 @@ public class PaneponPanel : MonoBehaviour
 
     //パネルの状態
     private PaneponSystem.PanelState _state = PaneponSystem.PanelState.Stable;
+    public PaneponSystem.PanelState state { get { return _state; } }
 
     //パネルの色
     private PaneponSystem.PanelColor _color = PaneponSystem.PanelColor.Max;
@@ -83,6 +84,8 @@ public class PaneponPanel : MonoBehaviour
                 _stateTimer += Time.deltaTime;
                 if (_stateTimer > FLASH_TIME)
                 {
+                    //MeshRendererをOFF
+                    _meshRenderer.enabled = false;
                     //ステート遷移 
                     _state = PaneponSystem.PanelState.None;
                     _stateTimer = 0f;
@@ -104,11 +107,20 @@ public class PaneponPanel : MonoBehaviour
         _moveDestX = destX;
         _moveDestY = destY;
         _moveRatio = 0f;
+
         //移動処理
         transform.localPosition = new Vector3(_posX, _posY, 0f);
 
         //@todo 移動先の床が無かったら落ちる処理に
         _state = PaneponSystem.PanelState.Stable;
+    }
+    /// <summary>
+    /// 色を設定
+    /// </summary>
+    /// <param name="color"></param>
+    public void SetColor(PaneponSystem.PanelColor color)
+    {
+        _color = color;
     }
     /// <summary>
     /// 移動後の位置を設定
@@ -128,8 +140,16 @@ public class PaneponPanel : MonoBehaviour
     /// </summary>
     public void StartErase()
     {
+        //Stableでない場合は行わない
+        if(_state != PaneponSystem.PanelState.Stable)
+        {
+            return;
+        }
         //ステート遷移
         _state = PaneponSystem.PanelState.Flash;
+
+        //@test 仮処理
+        print("フラッシュ");
     }
     
     #endregion

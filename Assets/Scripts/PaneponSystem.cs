@@ -71,6 +71,9 @@ public class PaneponSystem : MonoBehaviour
     private int _corsorPosX = 0;
     private int _corsorPosY = 0;
 
+    //パネルを消せる最小数
+    const int MIN_ERASE_COUNT = 3;
+
     #endregion
     private void Awake()
     {
@@ -85,6 +88,7 @@ public class PaneponSystem : MonoBehaviour
         {
             _panelPrefabList.Add(GameObject.Instantiate<PaneponPanel>(_panelPurefab));
             _panelMaterialList.Add(GameObject.Instantiate<Material>(_panelPrefabList[i].meshRenderer.material));
+            _panelPrefabList[i].gameObject.SetActive(false);
             _panelPrefabList[i].meshRenderer.material = _panelMaterialList[i];
             _panelMaterialList[i].mainTexture = _panelTextureList[i];
         }
@@ -95,9 +99,12 @@ public class PaneponSystem : MonoBehaviour
             for(int j = 0;j < FIELD_SIZE_X; j++)
             {
                 //パネルの実体
-                PaneponPanel newPanel = GameObject.Instantiate<PaneponPanel>(_panelPrefabList[Random.Range(0,_panelPrefabList.Count)]);
+                PanelColor color = (PanelColor)Random.Range(0, _panelPrefabList.Count);
+                PaneponPanel newPanel = GameObject.Instantiate<PaneponPanel>(_panelPrefabList[(int)color]);
                 //newPanel.transform.localPosition = new Vector3(j, i, 0f); 下のメソッドで置き換え
+                newPanel.gameObject.SetActive(true);
                 newPanel.SetPosition(j, i);
+                newPanel.SetColor(color);
                 _fieldPanels[i, j] = newPanel;
             }
         }
@@ -107,7 +114,7 @@ public class PaneponSystem : MonoBehaviour
         _cursolR = GameObject.Instantiate<GameObject>(_cursorPrefab);
 
         //カーソルの初期位置を設定
-        MoveCursor(0, 4);
+        MoveCursor(4, 4);
     }
 
     void Update()
@@ -139,6 +146,9 @@ public class PaneponSystem : MonoBehaviour
         //パネル入れ替え処理
         if (_inputSystem.Player.Swap.triggered)
         {
+            if(_fieldPanels[_corsorPosY, _corsorPosX].state == PanelState.Stable &&
+                _fieldPanels[_corsorPosY, _corsorPosX + 1].state == PanelState.Stable)
+            {
             _fieldPanels[_corsorPosY, _corsorPosX].Swap(_corsorPosX + 1, _corsorPosY);
             _fieldPanels[_corsorPosY, _corsorPosX + 1].Swap(_corsorPosX, _corsorPosY);
 
@@ -147,6 +157,13 @@ public class PaneponSystem : MonoBehaviour
             _fieldPanels[_corsorPosY, _corsorPosX] = _fieldPanels[_corsorPosY, _corsorPosX + 1];
             _fieldPanels[_corsorPosY, _corsorPosX + 1] = tmp;
         }
+            }
+
+
+        //パネルがそろっているかどうかの判定
+        CheckErase();
+
+        //消滅したパネルを消す処理
 
     }
 
@@ -160,16 +177,35 @@ public class PaneponSystem : MonoBehaviour
         _cursolR.transform.localPosition = new Vector3(leftX + 1, leftY, 0f);
     }
     /// <summary>
-    /// 消せるパネルがあるかの判定
+    /// パネルがそろっているかの判定
     /// </summary>
     void CheckErase()
     {
+
         for (int i = 0; i < FIELD_SIZE_Y / 2; i++)
         {
             for (int j = 0; j < FIELD_SIZE_X; j++)
             {
-                //パネルの実体
-                PanelColor baseColor =  _fieldPanels[i, j].color;
+                //パネル場合の処理(X方向)
+                int n = CheckSameColorHorizontal(j, i);
+                if (n >= MIN_ERASE_COUNT)
+                {
+                    for (int k = 0; k < n; k++)
+                    {
+                        _fieldPanels[i, j + k].StartErase();
+                    }
+                }
+
+                //パネル場合の処理(Y方向)
+                n = CheckSameColorVartical(j, i);
+                if (n >= MIN_ERASE_COUNT)
+                {
+                    for (int k = 0; k < n; k++)
+                    {
+                        _fieldPanels[i + k, j].StartErase();
+                    }
+                }
+
             }
         }
     }
@@ -179,10 +215,24 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="_x"></param>
     /// <param name="_y"></param>
     /// <returns>そろっている数</returns>
-    bool CheckSameColorHorizontal(int _x, int _y)
+    int CheckSameColorHorizontal(int _x, int _y)
     {
         PanelColor baseColor = GetColor(_x, _y);
-        return (baseColor == GetColor(_x + 1, _y) && baseColor == GetColor(_x + 2, _y));
+        PanelState baseState = GetState(_x, _y);
+        if(baseColor == PanelColor.Max || baseState != PanelState.Stable)
+        {
+            return 0;
+        }
+        int n = 0;
+        for(int x = _x; x < FIELD_SIZE_X; x++)
+        {
+            if(baseColor != GetColor(x, _y) || baseState != GetState(x, _y))
+            {
+                break;
+            }
+            n++;
+        }
+        return n;
     } 
     /// <summary>
     /// 縦方向にそろっているか
@@ -190,10 +240,24 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="_x"></param>
     /// <param name="_y"></param>
     /// <returns>そろっている数</returns>
-    bool CheckSameColorVartical(int _x, int _y)
+    int CheckSameColorVartical(int _x, int _y)
     {
         PanelColor baseColor = GetColor(_x, _y);
-        return (baseColor == GetColor(_x + 1, _y) && baseColor == GetColor(_x + 2, _y));
+        PanelState baseState = GetState(_x, _y);
+        if (baseColor == PanelColor.Max || baseState != PanelState.Stable)
+        {
+            return 0;
+        }
+        int n = 0;
+        for (int y = _y; y < FIELD_SIZE_Y; y++)
+        {
+            if (baseColor != GetColor(_x, y) || baseState != GetState(_x, y))
+            {
+                break;
+            }
+            n++;
+        }
+        return n;
     }
     PanelColor GetColor(int _x, int _y)
     {
@@ -201,7 +265,15 @@ public class PaneponSystem : MonoBehaviour
         {
             return PanelColor.Max;
         }
-        return _fieldPanels[_x, _y].color;
+        return (_fieldPanels[_y, _x] ? _fieldPanels[_y, _x].color : PanelColor.Max); 
+    }
+    PanelState GetState(int _x, int _y)
+    {
+        if (_x < 0 || FIELD_SIZE_X <= _x || _y < 0 || FIELD_SIZE_Y <= _y)
+        {
+            return PanelState.Max;
+        }
+        return (_fieldPanels[_y, _x] ? _fieldPanels[_y, _x].state : PanelState.Max);
     }
     #endregion
 }
