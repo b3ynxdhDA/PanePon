@@ -5,6 +5,12 @@ using UnityEngine;
 public class PaneponPanel : MonoBehaviour
 {
     #region 変数
+    //エフェクト用のオブジェクトのリスト
+    [SerializeField] private List<GameObject> _effectObjectList = new List<GameObject>();
+
+    //エフェクト点滅用の変数
+    private int _effectFlashCounter = 0;
+
     //メインのMeshRenderer
     [SerializeField] private MeshRenderer _meshRenderer = null;
 
@@ -46,6 +52,9 @@ public class PaneponPanel : MonoBehaviour
     {
         //ステートのデフォルトは静止状態
         _state = PaneponSystem.PanelState.Stable;
+
+        //デフォルトはエフェクトOFF
+        SetEffectVisible(false);
     }
 
 
@@ -70,9 +79,11 @@ public class PaneponPanel : MonoBehaviour
                 }
                 break;
             case PaneponSystem.PanelState.Flash:
+                //時間経過でエフェクトを点滅させる
+                SetEffectVisible((_effectFlashCounter++ / 2) % 2 == 0);
                 //時間経過でEraseに移行
                 _stateTimer += Time.deltaTime;
-                if(_stateTimer > FLASH_TIME)
+                if(_stateTimer >= FLASH_TIME)
                 {
                     //ステート遷移 
                     _state = PaneponSystem.PanelState.Erase;
@@ -80,10 +91,16 @@ public class PaneponPanel : MonoBehaviour
                 }
                 break;
             case PaneponSystem.PanelState.Erase:
+                //時間経過でエフェクトを四方八方に散らす
+                SetEffectVisible(true);
+                SetEffectDivision(0f);
+
                 //時間経過でパネル消滅
                 _stateTimer += Time.deltaTime;
-                if (_stateTimer > FLASH_TIME)
+                if (_stateTimer >= ERASE_TIME)
                 {
+                    //エフェクトも消す
+                    SetEffectVisible(false);
                     //MeshRendererをOFF
                     _meshRenderer.enabled = false;
                     //ステート遷移 
@@ -151,6 +168,23 @@ public class PaneponPanel : MonoBehaviour
         //@test 仮処理
         print("フラッシュ");
     }
-    
+    /// <summary>
+    /// エフェクトの可視性を設定
+    /// </summary>
+    /// <param name="flag"></param>
+    private void SetEffectVisible(bool flag)
+    {
+        for (int i = 0; i < _effectObjectList.Count; i++)
+        {
+            _effectObjectList[i].SetActive(flag);
+        }
+    }
+    private void SetEffectDivision(float _ratio)
+    {
+        for (int i = 0; i < _effectObjectList.Count; i++)
+        {
+            _effectObjectList[i].transform.localPosition *= 1.1f;   //@仮
+        }
+    }
     #endregion
 }

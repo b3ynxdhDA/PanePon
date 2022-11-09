@@ -146,9 +146,16 @@ public class PaneponSystem : MonoBehaviour
         //パネル入れ替え処理
         if (_inputSystem.Player.Swap.triggered)
         {
-            if(_fieldPanels[_corsorPosY, _corsorPosX].state == PanelState.Stable &&
-                _fieldPanels[_corsorPosY, _corsorPosX + 1].state == PanelState.Stable)
+            if(!(_fieldPanels[_corsorPosY, _corsorPosX].state == PanelState.Stable ||
+               _fieldPanels[_corsorPosY, _corsorPosX].state == PanelState.None))
             {
+                return;
+            }
+            if(!(_fieldPanels[_corsorPosY, _corsorPosX + 1].state == PanelState.Stable ||
+               _fieldPanels[_corsorPosY, _corsorPosX + 1].state == PanelState.None))
+            {
+                return;
+            }
             _fieldPanels[_corsorPosY, _corsorPosX].Swap(_corsorPosX + 1, _corsorPosY);
             _fieldPanels[_corsorPosY, _corsorPosX + 1].Swap(_corsorPosX, _corsorPosY);
 
@@ -157,7 +164,6 @@ public class PaneponSystem : MonoBehaviour
             _fieldPanels[_corsorPosY, _corsorPosX] = _fieldPanels[_corsorPosY, _corsorPosX + 1];
             _fieldPanels[_corsorPosY, _corsorPosX + 1] = tmp;
         }
-            }
 
 
         //パネルがそろっているかどうかの判定
