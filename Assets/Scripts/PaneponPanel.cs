@@ -25,18 +25,24 @@ public class PaneponPanel : MonoBehaviour
     public PaneponSystem.PanelColor color { get { return _color; } }
 
     //移動元の位置
-    int _posX = 0;
-    int _posY = 0;
+    private int _posX = 0;
+    private int _posY = 0;
     
     //移動先の位置
     int _moveDestX = 0;
     int _moveDestY = 0;
 
     //移動割合
-    float _moveRatio = 0f;
+    private float _moveRatio = 0f;
+
+    //パネルの落下速度
+    private float _fallSpeed = 0f;
 
     //ステート経過時間
-    float _stateTimer = 0f;
+    private float _stateTimer = 0f;
+
+    //落下の最大速度(1秒間に落下するマスの数)
+    const float MAX_FALL_SPEED = 10f;
 
     //入れ替えにかかる時間(4フレーム)
     const float SWAP_TIME = 4.0f / 60.0f;
@@ -58,7 +64,7 @@ public class PaneponPanel : MonoBehaviour
     }
 
 
-    void Update()
+    void  FixedUpdate()
     {
         switch (_state)
         {
@@ -95,7 +101,7 @@ public class PaneponPanel : MonoBehaviour
                 SetEffectVisible(true);
                 SetEffectDivision(0f);
 
-                //時間経過でパネル消滅
+                //時間経過でパネル完全消滅
                 _stateTimer += Time.deltaTime;
                 if (_stateTimer >= ERASE_TIME)
                 {
@@ -106,6 +112,24 @@ public class PaneponPanel : MonoBehaviour
                     //ステート遷移 
                     _state = PaneponSystem.PanelState.None;
                     _stateTimer = 0f;
+                }
+                break;
+            case PaneponSystem.PanelState.Fall:
+                _fallSpeed = Mathf.Clamp(_fallSpeed + 0.1f, 0f, MAX_FALL_SPEED);
+                _moveRatio += _fallSpeed;
+
+                //割合が1以上になったら下のマスに移動
+                if (_moveRatio >= 1.0f)
+                {
+                    //位置を直接設定
+                    SetPosition(_moveDestX, _moveDestY);
+                    //下にパネルがあったら停止
+                }
+                else
+                {
+                    //移動処理
+                    transform.localPosition = new Vector3(_posX, _posY, 0f) * (1f - _moveRatio) + 
+                        　　　　　　　　　　　new Vector3(_moveDestX, _moveDestY, 0f) * _moveRatio;
                 }
                 break;
         }

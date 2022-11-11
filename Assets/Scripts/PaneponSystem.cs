@@ -192,31 +192,16 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int j = 0; j < FIELD_SIZE_X; j++)
             {
-                //パネル場合の処理(X方向)
-                int n = CheckSameColorHorizontal(j, i);
-                if (n >= MIN_ERASE_COUNT)
-                {
-                    for (int k = 0; k < n; k++)
-                    {
-                        _fieldPanels[i, j + k].StartErase();
-                    }
-                }
+                //パネルが消せる場合の処理(X方向)
+                SameEraseHorixontal(i, j, CheckSameColorHorizontal(j, i));
 
-                //パネル場合の処理(Y方向)
-                n = CheckSameColorVartical(j, i);
-                if (n >= MIN_ERASE_COUNT)
-                {
-                    for (int k = 0; k < n; k++)
-                    {
-                        _fieldPanels[i + k, j].StartErase();
-                    }
-                }
-
+                //パネルが消せる場合の処理(Y方向)
+                SameEraseVartical(i, j, CheckSameColorVartical(j, i));
             }
         }
     }
     /// <summary>
-    /// 右方向にそろっているか
+    /// 横方向に何個そろっているか
     /// </summary>
     /// <param name="_x"></param>
     /// <param name="_y"></param>
@@ -241,7 +226,7 @@ public class PaneponSystem : MonoBehaviour
         return n;
     } 
     /// <summary>
-    /// 縦方向にそろっているか
+    /// 縦方向に何個そろっているか
     /// </summary>
     /// <param name="_x"></param>
     /// <param name="_y"></param>
@@ -265,6 +250,44 @@ public class PaneponSystem : MonoBehaviour
         }
         return n;
     }
+    /// <summary>
+    /// 横方向にパネルを何個消すか
+    /// </summary>
+    /// <param name="y"></param>
+    /// <param name="x"></param>
+    /// <param name="n"></param>
+    private void SameEraseHorixontal(int y, int x, int n)
+    {
+        if (n >= MIN_ERASE_COUNT)
+        {
+            for (int k = 0; k < n; k++)
+            {
+                _fieldPanels[y, x + k].StartErase();
+            }
+        }
+    }
+    /// <summary>
+    /// 縦方向にパネルを何個消すか
+    /// </summary>
+    /// <param name="y"></param>
+    /// <param name="x"></param>
+    /// <param name="n"></param>
+    private void SameEraseVartical(int y, int x, int n)
+    {
+        if (n >= MIN_ERASE_COUNT)
+        {
+            for (int k = 0; k < n; k++)
+            {
+                _fieldPanels[y + k, x].StartErase();
+            }
+        }
+    }
+    /// <summary>
+    /// パネルの色を取得する
+    /// </summary>
+    /// <param name="_x"></param>
+    /// <param name="_y"></param>
+    /// <returns></returns>
     PanelColor GetColor(int _x, int _y)
     {
         if(_x < 0 || FIELD_SIZE_X <= _x || _y < 0 || FIELD_SIZE_Y <= _y)
@@ -273,6 +296,12 @@ public class PaneponSystem : MonoBehaviour
         }
         return (_fieldPanels[_y, _x] ? _fieldPanels[_y, _x].color : PanelColor.Max); 
     }
+    /// <summary>
+    /// パネルのStateを取得
+    /// </summary>
+    /// <param name="_x"></param>
+    /// <param name="_y"></param>
+    /// <returns></returns>
     PanelState GetState(int _x, int _y)
     {
         if (_x < 0 || FIELD_SIZE_X <= _x || _y < 0 || FIELD_SIZE_Y <= _y)
@@ -280,6 +309,11 @@ public class PaneponSystem : MonoBehaviour
             return PanelState.Max;
         }
         return (_fieldPanels[_y, _x] ? _fieldPanels[_y, _x].state : PanelState.Max);
+    }
+
+    public PanelState GetPanelState(int _x, int _y)
+    {
+        return _fieldPanelsState[_y, _x];
     }
     #endregion
 }
