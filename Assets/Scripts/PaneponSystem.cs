@@ -58,7 +58,7 @@ public class PaneponSystem : MonoBehaviour
     private List<Material> _panelMaterialList = new List<Material>((int)PanelColor.Max);
 
     //フィールド上にあるパネルの状態
-    private PanelState[,] _fieldPanelsState = new PanelState[FIELD_SIZE_Y,FIELD_SIZE_X];
+    //private PanelState[,] _fieldPanelsState = new PanelState[FIELD_SIZE_Y,FIELD_SIZE_X];
 
     //影響しているパネルへの参照
     private PaneponPanel[,] _fieldPanels = new PaneponPanel[FIELD_SIZE_Y,FIELD_SIZE_X];
@@ -102,6 +102,7 @@ public class PaneponSystem : MonoBehaviour
                 PanelColor color = (PanelColor)Random.Range(0, _panelPrefabList.Count);
                 PaneponPanel newPanel = GameObject.Instantiate<PaneponPanel>(_panelPrefabList[(int)color]);
                 //newPanel.transform.localPosition = new Vector3(j, i, 0f); 下のメソッドで置き換え
+                newPanel.Init(this);
                 newPanel.gameObject.SetActive(true);
                 newPanel.SetPosition(j, i);
                 newPanel.SetColor(color);
@@ -170,6 +171,23 @@ public class PaneponSystem : MonoBehaviour
         CheckErase();
 
         //消滅したパネルを消す処理
+
+        /*//パネルの色を確認するテスト用
+        if (_inputSystem.Player.Up.triggered)
+        {
+            //配列を出力するテスト
+            print("Field---------------------------");
+            for (int y = 0; y < FIELD_SIZE_Y; y++)
+            {
+
+                for (int x = 0; x < FIELD_SIZE_X; x++)
+                {
+                    print(_fieldPanels[y, x].color);
+                }
+                print("\n");
+            }
+            print("Field---------------------------");
+        }*/
 
     }
 
@@ -252,6 +270,7 @@ public class PaneponSystem : MonoBehaviour
     }
     /// <summary>
     /// 横方向にパネルを何個消すか
+    /// @消したパネルがColorを持っているため消えたパネル同士でも色が揃えば消えてしまう
     /// </summary>
     /// <param name="y"></param>
     /// <param name="x"></param>
@@ -268,6 +287,7 @@ public class PaneponSystem : MonoBehaviour
     }
     /// <summary>
     /// 縦方向にパネルを何個消すか
+    /// @消したパネルがColorを持っているため消えたパネル同士でも色が揃えば消えてしまう
     /// </summary>
     /// <param name="y"></param>
     /// <param name="x"></param>
@@ -310,10 +330,29 @@ public class PaneponSystem : MonoBehaviour
         }
         return (_fieldPanels[_y, _x] ? _fieldPanels[_y, _x].state : PanelState.Max);
     }
-
+    /// <summary>
+    /// パネルの状態を取得
+    /// </summary>
+    /// <param name="_x"></param>
+    /// <param name="_y"></param>
+    /// <returns></returns>
     public PanelState GetPanelState(int _x, int _y)
     {
-        return _fieldPanelsState[_y, _x];
+        if(_y < 0 || _y >= FIELD_SIZE_Y)
+        {
+            return PaneponSystem.PanelState.Stable;
+        }
+        return _fieldPanels[_y, _x].state;
+    }
+    /// <summary>
+    /// パネルを配列内でも落下させる
+    /// </summary>
+    public void FallPanel(int _x, int _y)
+    {
+        //入れ替え
+        PaneponPanel tmp = _fieldPanels[_x, _y];
+        _fieldPanels[_x, _y] = _fieldPanels[_x, _y - 1];
+        _fieldPanels[_x, _y - 1] = tmp;
     }
     #endregion
 }

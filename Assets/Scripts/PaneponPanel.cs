@@ -53,6 +53,9 @@ public class PaneponPanel : MonoBehaviour
     //消滅時間(0.1秒)
     const float ERASE_TIME = 0.1f;
 
+    //システムへの参照
+    private PaneponSystem _system = null;
+
     #endregion
     void Start()
     {
@@ -89,7 +92,7 @@ public class PaneponPanel : MonoBehaviour
                 SetEffectVisible((_effectFlashCounter++ / 2) % 2 == 0);
                 //時間経過でEraseに移行
                 _stateTimer += Time.deltaTime;
-                if(_stateTimer >= FLASH_TIME)
+                if (_stateTimer >= FLASH_TIME)
                 {
                     //ステート遷移 
                     _state = PaneponSystem.PanelState.Erase;
@@ -128,14 +131,22 @@ public class PaneponPanel : MonoBehaviour
                 else
                 {
                     //移動処理
-                    transform.localPosition = new Vector3(_posX, _posY, 0f) * (1f - _moveRatio) + 
-                        　　　　　　　　　　　new Vector3(_moveDestX, _moveDestY, 0f) * _moveRatio;
+                    transform.localPosition = new Vector3(_posX, _posY, 0f) * (1f - _moveRatio) +
+                        new Vector3(_moveDestX, _moveDestY, 0f) * _moveRatio;
                 }
                 break;
         }
     }
 
     #region メソッド
+    /// <summary>
+    /// 初期化処理
+    /// </summary>
+    public void Init(PaneponSystem system)
+    {
+        //システムへの参照を保持
+        _system = system;
+    }
     /// <summary>
     /// パネル位置を直接設定
     /// </summary>
@@ -152,8 +163,17 @@ public class PaneponPanel : MonoBehaviour
         //移動処理
         transform.localPosition = new Vector3(_posX, _posY, 0f);
 
-        //@todo 移動先の床が無かったら落ちる処理に
-        _state = PaneponSystem.PanelState.Stable;
+        //移動先の床が無かったら落ちる処理に
+        PaneponSystem.PanelState panelState = _system.GetPanelState(_posX, _posY - 1);
+        if (panelState == PaneponSystem.PanelState.None || panelState == PaneponSystem.PanelState.Fall)
+        {
+            Fall(_posX, _posY - 1);
+        }
+        else
+        {
+            _state = PaneponSystem.PanelState.Stable;
+        }
+
     }
     /// <summary>
     /// 色を設定
@@ -177,6 +197,19 @@ public class PaneponPanel : MonoBehaviour
         _state = PaneponSystem.PanelState.Swap;
     }
     /// <summary>
+    /// 落下後の位置を設定
+    /// </summary>
+    /// <param name="desetX"></param>
+    /// <param name="desetY"></param>
+    public void Fall(int destX, int destY)
+    {
+        _moveDestX = destX;
+        _moveDestY = destY;
+
+        //ステート遷移
+        _state = PaneponSystem.PanelState.Fall;
+    }
+    /// <summary>
     /// ブロックを消す処理を開始する
     /// </summary>
     public void StartErase()
@@ -190,7 +223,7 @@ public class PaneponPanel : MonoBehaviour
         _state = PaneponSystem.PanelState.Flash;
 
         //@test 仮処理
-        print("フラッシュ");
+        //print("フラッシュ");
     }
     /// <summary>
     /// エフェクトの可視性を設定
@@ -203,6 +236,10 @@ public class PaneponPanel : MonoBehaviour
             _effectObjectList[i].SetActive(flag);
         }
     }
+    /// <summary>
+    /// エフェクトの動きの割合
+    /// </summary>
+    /// <param name="_ratio"></param>
     private void SetEffectDivision(float _ratio)
     {
         for (int i = 0; i < _effectObjectList.Count; i++)
