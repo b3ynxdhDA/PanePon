@@ -80,6 +80,8 @@ public class PaneponPanel : MonoBehaviour
                 {
                     //位置を直接設定
                     SetPosition(_moveDestX, _moveDestY);
+                    //
+                    _system.CheckAllPanels();
                 }
                 else
                 {
@@ -115,6 +117,8 @@ public class PaneponPanel : MonoBehaviour
                     //ステート遷移 
                     _state = PaneponSystem.PanelState.None;
                     _stateTimer = 0f;
+                    //全体のパネルの落下判定
+                    _system.CheckAllPanels();
                 }
                 break;
             case PaneponSystem.PanelState.Fall:
@@ -125,8 +129,12 @@ public class PaneponPanel : MonoBehaviour
                 if (_moveRatio >= 1.0f)
                 {
                     //位置を直接設定
+                    float moveRatioTmp = _moveRatio;
                     SetPosition(_moveDestX, _moveDestY);
-                    //下にパネルがあったら停止
+                    if (_state == PaneponSystem.PanelState.Fall)
+                    {
+                        _moveRatio = moveRatioTmp - 1f;
+                    }
                 }
                 else
                 {
@@ -164,16 +172,30 @@ public class PaneponPanel : MonoBehaviour
         transform.localPosition = new Vector3(_posX, _posY, 0f);
 
         //移動先の床が無かったら落ちる処理に
+        CheckToFall(false);
+    }
+    /// <summary>
+    /// 落下判定
+    /// </summary>
+    public void CheckToFall(bool isOnlyCheckStable)
+    {
+        //安定状態でない場合は行わない
+        if (isOnlyCheckStable && _state != PaneponSystem.PanelState.Stable)
+        {
+            return;
+        }
+        //移動先の床が無かったら落ちる処理に
         PaneponSystem.PanelState panelState = _system.GetPanelState(_posX, _posY - 1);
+        print(panelState);
         if (panelState == PaneponSystem.PanelState.None || panelState == PaneponSystem.PanelState.Fall)
         {
-            Fall(_posX, _posY - 1);
+            //落下処理
+            Fall();
         }
-        else
+        else if (isOnlyCheckStable)
         {
             _state = PaneponSystem.PanelState.Stable;
         }
-
     }
     /// <summary>
     /// 色を設定
@@ -201,10 +223,14 @@ public class PaneponPanel : MonoBehaviour
     /// </summary>
     /// <param name="desetX"></param>
     /// <param name="desetY"></param>
-    public void Fall(int destX, int destY)
+    public void Fall()
     {
-        _moveDestX = destX;
-        _moveDestY = destY;
+        //配列内での落下処理
+        _system.FallPanel(_posX, _posY);
+
+        //目的地は1個下のマス
+        _moveDestX = _posX;
+        _moveDestY = _posY - 1;
 
         //ステート遷移
         _state = PaneponSystem.PanelState.Fall;
@@ -221,9 +247,6 @@ public class PaneponPanel : MonoBehaviour
         }
         //ステート遷移
         _state = PaneponSystem.PanelState.Flash;
-
-        //@test 仮処理
-        //print("フラッシュ");
     }
     /// <summary>
     /// エフェクトの可視性を設定
@@ -247,5 +270,6 @@ public class PaneponPanel : MonoBehaviour
             _effectObjectList[i].transform.localPosition *= 1.1f;   //@仮
         }
     }
+
     #endregion
 }

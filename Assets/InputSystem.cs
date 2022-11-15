@@ -57,6 +57,14 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""Test"",
+                    ""type"": ""Button"",
+                    ""id"": ""eae6038b-0c5a-4182-881d-cc5374324f15"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
                 }
             ],
             ""bindings"": [
@@ -213,6 +221,17 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""action"": ""Swap"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8a0ac1f7-9ce5-4310-9d4f-a6158d9a3cb8"",
+                    ""path"": ""<Keyboard>/t"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Test"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -226,6 +245,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
         m_Player_Right = m_Player.FindAction("Right", throwIfNotFound: true);
         m_Player_Left = m_Player.FindAction("Left", throwIfNotFound: true);
         m_Player_Swap = m_Player.FindAction("Swap", throwIfNotFound: true);
+        m_Player_Test = m_Player.FindAction("Test", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -280,6 +300,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_Right;
     private readonly InputAction m_Player_Left;
     private readonly InputAction m_Player_Swap;
+    private readonly InputAction m_Player_Test;
     public struct PlayerActions
     {
         private @InputSystem m_Wrapper;
@@ -289,6 +310,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
         public InputAction @Right => m_Wrapper.m_Player_Right;
         public InputAction @Left => m_Wrapper.m_Player_Left;
         public InputAction @Swap => m_Wrapper.m_Player_Swap;
+        public InputAction @Test => m_Wrapper.m_Player_Test;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -313,6 +335,9 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @Swap.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwap;
                 @Swap.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwap;
                 @Swap.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnSwap;
+                @Test.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTest;
+                @Test.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTest;
+                @Test.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTest;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -332,6 +357,9 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @Swap.started += instance.OnSwap;
                 @Swap.performed += instance.OnSwap;
                 @Swap.canceled += instance.OnSwap;
+                @Test.started += instance.OnTest;
+                @Test.performed += instance.OnTest;
+                @Test.canceled += instance.OnTest;
             }
         }
     }
@@ -343,5 +371,6 @@ public class @InputSystem : IInputActionCollection, IDisposable
         void OnRight(InputAction.CallbackContext context);
         void OnLeft(InputAction.CallbackContext context);
         void OnSwap(InputAction.CallbackContext context);
+        void OnTest(InputAction.CallbackContext context);
     }
 }

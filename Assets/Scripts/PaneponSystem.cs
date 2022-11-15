@@ -10,8 +10,8 @@ public class PaneponSystem : MonoBehaviour
     InputSystem _inputSystem;
 
     const int FIELD_SIZE_X = 6;
-    const int FIELD_SIZE_Y_BASE = 12;
-    const int FIELD_SIZE_Y = 24;
+    const int FIELD_SIZE_Y_BASE = 6;
+    const int FIELD_SIZE_Y = 12;
 
     //パネルのプレハブのもと
     [SerializeField] private PaneponPanel _panelPurefab = null;
@@ -94,7 +94,7 @@ public class PaneponSystem : MonoBehaviour
         }
 
         //初期状態のパネルの配置
-        for (int i = 0; i < FIELD_SIZE_Y_BASE / 2; i++)
+        for (int i = 0; i < FIELD_SIZE_Y; i++)
         {
             for(int j = 0;j < FIELD_SIZE_X; j++)
             {
@@ -120,6 +120,9 @@ public class PaneponSystem : MonoBehaviour
 
     void Update()
     {
+        //Noneのパネルを消す
+        DeletEmptyPanel();
+
         //カーソル移動処理
         int deltaY = 0;
         int deltaX = 0;
@@ -147,18 +150,14 @@ public class PaneponSystem : MonoBehaviour
         //パネル入れ替え処理
         if (_inputSystem.Player.Swap.triggered)
         {
-            if(!(_fieldPanels[_corsorPosY, _corsorPosX].state == PanelState.Stable ||
-               _fieldPanels[_corsorPosY, _corsorPosX].state == PanelState.None))
+            if (_fieldPanels[_corsorPosY, _corsorPosX])
             {
-                return;
+                _fieldPanels[_corsorPosY, _corsorPosX].Swap(_corsorPosX + 1, _corsorPosY);
             }
-            if(!(_fieldPanels[_corsorPosY, _corsorPosX + 1].state == PanelState.Stable ||
-               _fieldPanels[_corsorPosY, _corsorPosX + 1].state == PanelState.None))
+            if (_fieldPanels[_corsorPosY, _corsorPosX + 1])
             {
-                return;
+                _fieldPanels[_corsorPosY, _corsorPosX + 1].Swap(_corsorPosX, _corsorPosY);
             }
-            _fieldPanels[_corsorPosY, _corsorPosX].Swap(_corsorPosX + 1, _corsorPosY);
-            _fieldPanels[_corsorPosY, _corsorPosX + 1].Swap(_corsorPosX, _corsorPosY);
 
             //入れ替え
             PaneponPanel tmp = _fieldPanels[_corsorPosY, _corsorPosX];
@@ -172,26 +171,40 @@ public class PaneponSystem : MonoBehaviour
 
         //消滅したパネルを消す処理
 
-        /*//パネルの色を確認するテスト用
-        if (_inputSystem.Player.Up.triggered)
+        if (_inputSystem.Player.Test.triggered)
         {
-            //配列を出力するテスト
-            print("Field---------------------------");
-            for (int y = 0; y < FIELD_SIZE_Y; y++)
-            {
-
-                for (int x = 0; x < FIELD_SIZE_X; x++)
-                {
-                    print(_fieldPanels[y, x].color);
-                }
-                print("\n");
-            }
-            print("Field---------------------------");
-        }*/
+            Test();
+        }
 
     }
 
     #region メソッド
+    /// <summary>
+    /// テストのため
+    /// 配列の中身を出力する
+    /// </summary>
+    void Test()
+    {
+        print("Field---------------------------");
+        for (int y = 0; y < FIELD_SIZE_Y; y++)
+        {
+            print("\n");
+            print("Line : " + y);
+            for (int x = 0; x < FIELD_SIZE_X; x++)
+            {
+                if (_fieldPanels[y, x] == null)
+                {
+                    print("NULLです");
+                }
+                else
+                {
+                    print(_fieldPanels[y, x].state + "  " + _fieldPanels[y, x].color);
+                }
+            }
+        }
+        print("Field---------------------------");
+
+    }
     /// <summary>
     /// カーソル移動
     /// </summary>    
@@ -205,8 +218,7 @@ public class PaneponSystem : MonoBehaviour
     /// </summary>
     void CheckErase()
     {
-
-        for (int i = 0; i < FIELD_SIZE_Y / 2; i++)
+        for (int i = 0; i < FIELD_SIZE_Y; i++)
         {
             for (int j = 0; j < FIELD_SIZE_X; j++)
             {
@@ -270,11 +282,10 @@ public class PaneponSystem : MonoBehaviour
     }
     /// <summary>
     /// 横方向にパネルを何個消すか
-    /// @消したパネルがColorを持っているため消えたパネル同士でも色が揃えば消えてしまう
     /// </summary>
     /// <param name="y"></param>
     /// <param name="x"></param>
-    /// <param name="n"></param>
+    /// <param name="n">そろっている数</param>
     private void SameEraseHorixontal(int y, int x, int n)
     {
         if (n >= MIN_ERASE_COUNT)
@@ -287,11 +298,10 @@ public class PaneponSystem : MonoBehaviour
     }
     /// <summary>
     /// 縦方向にパネルを何個消すか
-    /// @消したパネルがColorを持っているため消えたパネル同士でも色が揃えば消えてしまう
     /// </summary>
     /// <param name="y"></param>
     /// <param name="x"></param>
-    /// <param name="n"></param>
+    /// <param name="n">そろっている数</param>
     private void SameEraseVartical(int y, int x, int n)
     {
         if (n >= MIN_ERASE_COUNT)
@@ -342,6 +352,10 @@ public class PaneponSystem : MonoBehaviour
         {
             return PaneponSystem.PanelState.Stable;
         }
+        if(_fieldPanels[_y, _x] == null)
+        {
+            return PaneponSystem.PanelState.None;
+        }
         return _fieldPanels[_y, _x].state;
     }
     /// <summary>
@@ -350,9 +364,39 @@ public class PaneponSystem : MonoBehaviour
     public void FallPanel(int _x, int _y)
     {
         //入れ替え
-        PaneponPanel tmp = _fieldPanels[_x, _y];
-        _fieldPanels[_x, _y] = _fieldPanels[_x, _y - 1];
-        _fieldPanels[_x, _y - 1] = tmp;
+        PaneponPanel tmp = _fieldPanels[_y, _x];
+        _fieldPanels[_y, _x] = _fieldPanels[_y - 1, _x];
+        _fieldPanels[_y - 1, _x] = tmp;
+    }
+    /// <summary>
+    /// Noneのパネルを消す
+    /// </summary>
+    void DeletEmptyPanel()
+    {
+        for (int y = 0; y < FIELD_SIZE_Y; y++)
+        {
+            for (int x = 0; x < FIELD_SIZE_X; x++)
+            {
+                if(_fieldPanels[y, x] && _fieldPanels[y, x].state == PanelState.None)
+                {
+                    Destroy(_fieldPanels[y, x]);
+                    _fieldPanels[y, x] = null;
+                }
+            }
+        }
+    }
+    /// <summary>jj
+    /// 全てのパネルをチェックする
+    /// </summary>
+    public void CheckAllPanels()
+    {
+        for (int y = 0; y < FIELD_SIZE_Y; y++)
+        {
+            for (int x = 0; x < FIELD_SIZE_X; x++)
+            {
+                _fieldPanels[y, x].CheckToFall(true);
+            }
+        }
     }
     #endregion
 }
