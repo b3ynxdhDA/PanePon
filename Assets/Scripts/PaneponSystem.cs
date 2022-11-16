@@ -394,7 +394,14 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                _fieldPanels[y, x].CheckToFall(true);
+                if(_fieldPanels[y, x])
+                {
+                    if (_fieldPanels[y, x].CheckToFall(true))
+                    {
+                        CheckAllPanels();
+                        return;
+                    }
+                }
             }
         }
     }

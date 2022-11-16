@@ -80,7 +80,7 @@ public class PaneponPanel : MonoBehaviour
                 {
                     //位置を直接設定
                     SetPosition(_moveDestX, _moveDestY);
-                    //
+                    //全体のパネルの落下判定
                     _system.CheckAllPanels();
                 }
                 else
@@ -177,25 +177,34 @@ public class PaneponPanel : MonoBehaviour
     /// <summary>
     /// 落下判定
     /// </summary>
-    public void CheckToFall(bool isOnlyCheckStable)
+    public bool CheckToFall(bool isOnlyCheckStable)
     {
         //安定状態でない場合は行わない
         if (isOnlyCheckStable && _state != PaneponSystem.PanelState.Stable)
         {
-            return;
+            return false;
         }
         //移動先の床が無かったら落ちる処理に
         PaneponSystem.PanelState panelState = _system.GetPanelState(_posX, _posY - 1);
-        print(panelState);
         if (panelState == PaneponSystem.PanelState.None || panelState == PaneponSystem.PanelState.Fall)
         {
-            //落下処理
-            Fall();
+            if (isOnlyCheckStable)
+            {
+                return true;
+            }
+            else
+            {
+                //落下処理
+                Fall();
+                return true;
+            }
+
         }
-        else if (isOnlyCheckStable)
+        else 
         {
             _state = PaneponSystem.PanelState.Stable;
         }
+        return false;
     }
     /// <summary>
     /// 色を設定
