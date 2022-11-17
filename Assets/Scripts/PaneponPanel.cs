@@ -20,6 +20,11 @@ public class PaneponPanel : MonoBehaviour
     private PaneponSystem.PanelState _state = PaneponSystem.PanelState.Stable;
     public PaneponSystem.PanelState state { get { return _state; } }
 
+    //パネルの状態が入れ替え可能かどうか
+    public bool _isSwapSble { get { return (_state == PaneponSystem.PanelState.None || 
+                                            _state == PaneponSystem.PanelState.Stable || 
+                                            _state == PaneponSystem.PanelState.Fall); } }
+
     //パネルの色
     private PaneponSystem.PanelColor _color = PaneponSystem.PanelColor.Max;
     public PaneponSystem.PanelColor color { get { return _color; } }
@@ -41,11 +46,11 @@ public class PaneponPanel : MonoBehaviour
     //ステート経過時間
     private float _stateTimer = 0f;
 
-    //落下の最大速度(1秒間に落下するマスの数)
-    const float MAX_FALL_SPEED = 10f;
-
     //入れ替えにかかる時間(4フレーム)
     const float SWAP_TIME = 4.0f / 60.0f;
+
+    //落下の最大速度(1秒間に落下するマスの数)
+    const float MAX_FALL_SPEED = 60.0f / 4.0f;
 
     //発光時間(1秒)
     const float FLASH_TIME = 1f;
@@ -67,7 +72,7 @@ public class PaneponPanel : MonoBehaviour
     }
 
 
-    void  FixedUpdate()
+    public void  UpdateManual()
     {
         switch (_state)
         {
@@ -123,7 +128,7 @@ public class PaneponPanel : MonoBehaviour
                 break;
             case PaneponSystem.PanelState.Fall:
                 _fallSpeed = Mathf.Clamp(_fallSpeed + 0.1f, 0f, MAX_FALL_SPEED);
-                _moveRatio += _fallSpeed;
+                _moveRatio += _fallSpeed * Time.deltaTime;
 
                 //割合が1以上になったら下のマスに移動
                 if (_moveRatio >= 1.0f)
@@ -134,6 +139,9 @@ public class PaneponPanel : MonoBehaviour
                     if (_state == PaneponSystem.PanelState.Fall)
                     {
                         _moveRatio = moveRatioTmp - 1f;
+                        //移動処理
+                        transform.localPosition = new Vector3(_posX, _posY, 0f) * (1f - _moveRatio) +
+                            new Vector3(_moveDestX, _moveDestY, 0f) * _moveRatio;
                     }
                 }
                 else
@@ -176,6 +184,7 @@ public class PaneponPanel : MonoBehaviour
     }
     /// <summary>
     /// 落下判定
+    /// @パネルによって落下速度が違う
     /// </summary>
     public bool CheckToFall(bool isOnlyCheckStable)
     {
@@ -184,23 +193,15 @@ public class PaneponPanel : MonoBehaviour
         {
             return false;
         }
-        //移動先の床が無かったら落ちる処理に
+        //移動先の床が無い かつ 移動先より下に隙間があったら落ちる処理に
         PaneponSystem.PanelState panelState = _system.GetPanelState(_posX, _posY - 1);
-        if (panelState == PaneponSystem.PanelState.None || panelState == PaneponSystem.PanelState.Fall)
+        if (panelState == PaneponSystem.PanelState.None)// || panelState == PaneponSystem.PanelState.Fall
         {
-            if (isOnlyCheckStable)
-            {
-                return true;
-            }
-            else
-            {
-                //落下処理
-                Fall();
-                return true;
-            }
-
+            //落下処理
+            Fall();
+            return true;
         }
-        else 
+        else
         {
             _state = PaneponSystem.PanelState.Stable;
         }

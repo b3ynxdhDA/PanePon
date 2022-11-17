@@ -63,6 +63,10 @@ public class PaneponSystem : MonoBehaviour
     //影響しているパネルへの参照
     private PaneponPanel[,] _fieldPanels = new PaneponPanel[FIELD_SIZE_Y,FIELD_SIZE_X];
 
+    //パネルを下から出現させる
+    private float _scrollSpeed = 0.2f;
+    private float _scrollRaio = 0;
+
     //カーソル
     private GameObject _cursolL = null;
     private GameObject _cursolR = null;
@@ -123,6 +127,22 @@ public class PaneponSystem : MonoBehaviour
         //Noneのパネルを消す
         DeletEmptyPanel();
 
+        //スクロール処理
+        _scrollRaio += _scrollSpeed * Time.deltaTime;
+        if(_scrollRaio >= 1.0f)
+        {
+            //スクロール割合をリセット
+            _scrollRaio = 0f;
+            //1マス分のスクロールが完了
+            for (int y = FIELD_SIZE_Y - 2; y >= 0; y--)
+            {
+                for (int x = 0; x < FIELD_SIZE_X; x++)
+                {
+                    _fieldPanels[y + 1, x] = _fieldPanels[y, x];
+                }
+            }
+        }
+
         //カーソル移動処理
         int deltaY = 0;
         int deltaX = 0;
@@ -148,7 +168,7 @@ public class PaneponSystem : MonoBehaviour
         MoveCursor(_corsorPosX, _corsorPosY);
 
         //パネル入れ替え処理
-        if (_inputSystem.Player.Swap.triggered)
+        if (_inputSystem.Player.Swap.triggered && IsSwapAble())
         {
             if (_fieldPanels[_corsorPosY, _corsorPosX])
             {
@@ -178,6 +198,24 @@ public class PaneponSystem : MonoBehaviour
 
     }
 
+    private void FixedUpdate()
+    {
+        //パネルのUpdateを下から行う
+        for (int y = 0; y < FIELD_SIZE_Y; y++)
+        {
+            for (int x = 0; x < FIELD_SIZE_X; x++)
+            {
+                PaneponPanel panel = _fieldPanels[y, x];
+                if (panel)
+                {
+                    panel.UpdateManual();
+                }
+            }
+        }
+        //全てのパネルをチェック
+        CheckAllPanels();
+    }
+
     #region メソッド
     /// <summary>
     /// テストのため
@@ -204,6 +242,22 @@ public class PaneponSystem : MonoBehaviour
         }
         print("Field---------------------------");
 
+    }
+    /// <summary>
+    /// パネルが入れ替え可能な状態かどうか
+    /// </summary>
+    /// <returns></returns>
+    bool IsSwapAble()
+    {
+        if (_fieldPanels[_corsorPosY, _corsorPosX] && !_fieldPanels[_corsorPosY, _corsorPosX]._isSwapSble)
+        {
+            return false;
+        }
+        if (_fieldPanels[_corsorPosY, _corsorPosX + 1] && !_fieldPanels[_corsorPosY, _corsorPosX + 1]._isSwapSble)
+        {
+            return false;
+        }
+        return true;
     }
     /// <summary>
     /// カーソル移動
@@ -394,13 +448,10 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if(_fieldPanels[y, x])
+                if (_fieldPanels[y, x] && _fieldPanels[y, x].CheckToFall(true))
                 {
-                    if (_fieldPanels[y, x].CheckToFall(true))
-                    {
-                        CheckAllPanels();
-                        return;
-                    }
+                    //CheckAllPanels();
+                    //return;
                 }
             }
         }
