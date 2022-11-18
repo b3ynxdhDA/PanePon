@@ -11,7 +11,7 @@ public class PaneponSystem : MonoBehaviour
 
     const int FIELD_SIZE_X = 6;
     const int FIELD_SIZE_Y_BASE = 6;
-    const int FIELD_SIZE_Y = 12;
+    const int FIELD_SIZE_Y = 15;
 
     //パネルのプレハブのもと
     [SerializeField] private PaneponPanel _panelPurefab = null;
@@ -98,7 +98,7 @@ public class PaneponSystem : MonoBehaviour
         }
 
         //初期状態のパネルの配置
-        for (int i = 0; i < FIELD_SIZE_Y; i++)
+        for (int i = 0; i < FIELD_SIZE_Y_BASE; i++)
         {
             for(int j = 0;j < FIELD_SIZE_X; j++)
             {
@@ -126,22 +126,6 @@ public class PaneponSystem : MonoBehaviour
     {
         //Noneのパネルを消す
         DeletEmptyPanel();
-
-        //スクロール処理
-        _scrollRaio += _scrollSpeed * Time.deltaTime;
-        if(_scrollRaio >= 1.0f)
-        {
-            //スクロール割合をリセット
-            _scrollRaio = 0f;
-            //1マス分のスクロールが完了
-            for (int y = FIELD_SIZE_Y - 2; y >= 0; y--)
-            {
-                for (int x = 0; x < FIELD_SIZE_X; x++)
-                {
-                    _fieldPanels[y + 1, x] = _fieldPanels[y, x];
-                }
-            }
-        }
 
         //カーソル移動処理
         int deltaY = 0;
@@ -214,6 +198,30 @@ public class PaneponSystem : MonoBehaviour
         }
         //全てのパネルをチェック
         CheckAllPanels();
+
+        //スクロール処理
+        _scrollRaio += _scrollSpeed * Time.deltaTime;
+        if (_scrollRaio >= 1.0f)
+        {
+            //スクロール割合をリセット
+            _scrollRaio = 0f;
+
+            ScrollUp();
+
+            //パネルをランダムに追加する
+            int y = 0;
+            for (int x = 0; x < FIELD_SIZE_X; x++)
+            {
+                //パネルの実体
+                PanelColor color = (PanelColor)Random.Range(0, _panelPrefabList.Count);
+                PaneponPanel newPanel = GameObject.Instantiate<PaneponPanel>(_panelPrefabList[(int)color]);
+                newPanel.Init(this);
+                newPanel.gameObject.SetActive(true);
+                newPanel.SetPosition(x, y);
+                newPanel.SetColor(color);
+                _fieldPanels[y, x] = newPanel;
+            }
+        }
     }
 
     #region メソッド
@@ -277,10 +285,10 @@ public class PaneponSystem : MonoBehaviour
             for (int j = 0; j < FIELD_SIZE_X; j++)
             {
                 //パネルが消せる場合の処理(X方向)
-                SameEraseHorixontal(i, j, CheckSameColorHorizontal(j, i));
+                SameEraseHorixontal(j, i, CheckSameColorHorizontal(j, i));
 
                 //パネルが消せる場合の処理(Y方向)
-                SameEraseVartical(i, j, CheckSameColorVartical(j, i));
+                SameEraseVartical(j, i, CheckSameColorVartical(j, i));
             }
         }
     }
@@ -340,13 +348,13 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="y"></param>
     /// <param name="x"></param>
     /// <param name="n">そろっている数</param>
-    private void SameEraseHorixontal(int y, int x, int n)
+    private void SameEraseHorixontal(int _x, int _y, int n)
     {
         if (n >= MIN_ERASE_COUNT)
         {
             for (int k = 0; k < n; k++)
             {
-                _fieldPanels[y, x + k].StartErase();
+                _fieldPanels[_y, _x + k].StartErase();
             }
         }
     }
@@ -356,13 +364,13 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="y"></param>
     /// <param name="x"></param>
     /// <param name="n">そろっている数</param>
-    private void SameEraseVartical(int y, int x, int n)
+    private void SameEraseVartical(int _x, int _y, int n)
     {
         if (n >= MIN_ERASE_COUNT)
         {
             for (int k = 0; k < n; k++)
             {
-                _fieldPanels[y + k, x].StartErase();
+                _fieldPanels[_y + k, _x].StartErase();
             }
         }
     }
@@ -421,6 +429,23 @@ public class PaneponSystem : MonoBehaviour
         PaneponPanel tmp = _fieldPanels[_y, _x];
         _fieldPanels[_y, _x] = _fieldPanels[_y - 1, _x];
         _fieldPanels[_y - 1, _x] = tmp;
+    }
+    /// <summary>
+    /// 1マス分のスクロール移動(上のパネルから)
+    /// </summary>
+    private void ScrollUp()
+    {
+        for (int y = FIELD_SIZE_Y - 2; y >= 0; y--)
+        {
+            for (int x = 0; x < FIELD_SIZE_X; x++)
+            {
+                _fieldPanels[y + 1, x] = _fieldPanels[y, x];
+                if (_fieldPanels[y + 1, x])
+                {
+                    _fieldPanels[y + 1, x].CarryUp();
+                }
+            }
+        }
     }
     /// <summary>
     /// Noneのパネルを消す

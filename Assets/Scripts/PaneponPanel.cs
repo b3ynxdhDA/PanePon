@@ -50,7 +50,7 @@ public class PaneponPanel : MonoBehaviour
     const float SWAP_TIME = 4.0f / 60.0f;
 
     //落下の最大速度(1秒間に落下するマスの数)
-    const float MAX_FALL_SPEED = 60.0f / 4.0f;
+    const float MAX_FALL_SPEED = 10.0f;
 
     //発光時間(1秒)
     const float FLASH_TIME = 1f;
@@ -127,7 +127,7 @@ public class PaneponPanel : MonoBehaviour
                 }
                 break;
             case PaneponSystem.PanelState.Fall:
-                _fallSpeed = Mathf.Clamp(_fallSpeed + 0.1f, 0f, MAX_FALL_SPEED);
+                _fallSpeed = Mathf.Clamp(_fallSpeed + 0.5f, 0f, MAX_FALL_SPEED);
                 _moveRatio += _fallSpeed * Time.deltaTime;
 
                 //割合が1以上になったら下のマスに移動
@@ -280,6 +280,15 @@ public class PaneponPanel : MonoBehaviour
             _effectObjectList[i].transform.localPosition *= 1.1f;   //@仮
         }
     }
+    /// <summary>
+    /// 1マス分上に移動する
+    /// </summary>
+    public void CarryUp()
+    {
+        _posY++;
+        _moveDestY++;
 
+        transform.localPosition += Vector3.up;
+    }
     #endregion
 }
