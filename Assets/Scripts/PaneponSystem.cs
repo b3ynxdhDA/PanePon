@@ -19,6 +19,12 @@ public class PaneponSystem : MonoBehaviour
     //パネルのテクスチャを設定する用
     [SerializeField] private List<Texture> _panelTextureList = new List<Texture>();
 
+    //パネル全体の位置を制御するやつ
+    [SerializeField] private GameObject _panelRoot = null;
+
+    //1番下のパネルを隠すカード
+    [SerializeField] private GameObject _bottomQuad = null;
+
     //カーソルのプレハブ
     [SerializeField] private GameObject _cursorPrefab = null;
 
@@ -67,6 +73,9 @@ public class PaneponSystem : MonoBehaviour
     private float _scrollSpeed = 0.2f;
     private float _scrollRaio = 0;
 
+    //BottomQardの初期位置
+    private Vector3 _bottomQardPos = new Vector3(2.5f, 0f, -0.55f);
+
     //カーソル
     private GameObject _cursolL = null;
     private GameObject _cursolR = null;
@@ -105,7 +114,7 @@ public class PaneponSystem : MonoBehaviour
                 //パネルの実体
                 PanelColor color = (PanelColor)Random.Range(0, _panelPrefabList.Count);
                 PaneponPanel newPanel = GameObject.Instantiate<PaneponPanel>(_panelPrefabList[(int)color]);
-                //newPanel.transform.localPosition = new Vector3(j, i, 0f); 下のメソッドで置き換え
+                newPanel.transform.SetParent(_panelRoot.transform);
                 newPanel.Init(this);
                 newPanel.gameObject.SetActive(true);
                 newPanel.SetPosition(j, i);
@@ -114,12 +123,19 @@ public class PaneponSystem : MonoBehaviour
             }
         }
 
+        //BottomQardの位置を初期化
+        _bottomQuad.transform.localPosition = _bottomQardPos;
+        _bottomQuad.transform.SetParent(_panelRoot.transform);
+
         //カーソルの用意
         _cursolL = GameObject.Instantiate<GameObject>(_cursorPrefab);
+        _cursolL.transform.SetParent(_panelRoot.transform);
         _cursolR = GameObject.Instantiate<GameObject>(_cursorPrefab);
+        _cursolR.transform.SetParent(_panelRoot.transform);
 
         //カーソルの初期位置を設定
-        MoveCursor(4, 4);
+        _corsorPosX = 2;
+        _corsorPosY = 4;
     }
 
     void Update()
@@ -148,11 +164,11 @@ public class PaneponSystem : MonoBehaviour
             deltaX--;
         }
         _corsorPosX = Mathf.Clamp(_corsorPosX + deltaX, 0, 4);
-        _corsorPosY = Mathf.Clamp(_corsorPosY + deltaY, 0, 12);
+        _corsorPosY = Mathf.Clamp(_corsorPosY + deltaY, 0, FIELD_SIZE_Y);
         MoveCursor(_corsorPosX, _corsorPosY);
 
         //パネル入れ替え処理
-        if (_inputSystem.Player.Swap.triggered && IsSwapAble())
+        if (_inputSystem.Player.Swap.triggered && IsSwapable())
         {
             if (_fieldPanels[_corsorPosY, _corsorPosX])
             {
@@ -184,7 +200,7 @@ public class PaneponSystem : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //パネルのUpdateを下から行う
+        //PaneponPanelのUpdateを下から行う
         for (int y = 0; y < FIELD_SIZE_Y; y++)
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
@@ -208,6 +224,9 @@ public class PaneponSystem : MonoBehaviour
 
             ScrollUp();
 
+            //カーソルを1マス分上に上げる
+            _corsorPosY++;
+
             //パネルをランダムに追加する
             int y = 0;
             for (int x = 0; x < FIELD_SIZE_X; x++)
@@ -215,6 +234,7 @@ public class PaneponSystem : MonoBehaviour
                 //パネルの実体
                 PanelColor color = (PanelColor)Random.Range(0, _panelPrefabList.Count);
                 PaneponPanel newPanel = GameObject.Instantiate<PaneponPanel>(_panelPrefabList[(int)color]);
+                newPanel.transform.SetParent(_panelRoot.transform);
                 newPanel.Init(this);
                 newPanel.gameObject.SetActive(true);
                 newPanel.SetPosition(x, y);
@@ -222,6 +242,7 @@ public class PaneponSystem : MonoBehaviour
                 _fieldPanels[y, x] = newPanel;
             }
         }
+        _panelRoot.transform.localPosition = new Vector3(0f, _scrollRaio, 0f);
     }
 
     #region メソッド
@@ -229,7 +250,7 @@ public class PaneponSystem : MonoBehaviour
     /// テストのため
     /// 配列の中身を出力する
     /// </summary>
-    void Test()
+    private void Test()
     {
         print("Field---------------------------");
         for (int y = 0; y < FIELD_SIZE_Y; y++)
@@ -255,7 +276,7 @@ public class PaneponSystem : MonoBehaviour
     /// パネルが入れ替え可能な状態かどうか
     /// </summary>
     /// <returns></returns>
-    bool IsSwapAble()
+    private bool IsSwapable()
     {
         if (_fieldPanels[_corsorPosY, _corsorPosX] && !_fieldPanels[_corsorPosY, _corsorPosX]._isSwapSble)
         {
@@ -270,7 +291,7 @@ public class PaneponSystem : MonoBehaviour
     /// <summary>
     /// カーソル移動
     /// </summary>    
-    void MoveCursor(int leftX, int leftY)
+    private void MoveCursor(int leftX, int leftY)
     {
         _cursolL.transform.localPosition = new Vector3(leftX, leftY, 0f);
         _cursolR.transform.localPosition = new Vector3(leftX + 1, leftY, 0f);
@@ -278,7 +299,7 @@ public class PaneponSystem : MonoBehaviour
     /// <summary>
     /// パネルがそろっているかの判定
     /// </summary>
-    void CheckErase()
+    private void CheckErase()
     {
         for (int i = 0; i < FIELD_SIZE_Y; i++)
         {
@@ -298,7 +319,7 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="_x"></param>
     /// <param name="_y"></param>
     /// <returns>そろっている数</returns>
-    int CheckSameColorHorizontal(int _x, int _y)
+    private int CheckSameColorHorizontal(int _x, int _y)
     {
         PanelColor baseColor = GetColor(_x, _y);
         PanelState baseState = GetState(_x, _y);
@@ -316,14 +337,14 @@ public class PaneponSystem : MonoBehaviour
             n++;
         }
         return n;
-    } 
+    }
     /// <summary>
     /// 縦方向に何個そろっているか
     /// </summary>
     /// <param name="_x"></param>
     /// <param name="_y"></param>
     /// <returns>そろっている数</returns>
-    int CheckSameColorVartical(int _x, int _y)
+    private int CheckSameColorVartical(int _x, int _y)
     {
         PanelColor baseColor = GetColor(_x, _y);
         PanelState baseState = GetState(_x, _y);
@@ -450,7 +471,7 @@ public class PaneponSystem : MonoBehaviour
     /// <summary>
     /// Noneのパネルを消す
     /// </summary>
-    void DeletEmptyPanel()
+    private void DeletEmptyPanel()
     {
         for (int y = 0; y < FIELD_SIZE_Y; y++)
         {

@@ -34,8 +34,8 @@ public class PaneponPanel : MonoBehaviour
     private int _posY = 0;
     
     //移動先の位置
-    int _moveDestX = 0;
-    int _moveDestY = 0;
+    private int _moveDestX = 0;
+    private int _moveDestY = 0;
 
     //移動割合
     private float _moveRatio = 0f;
@@ -50,7 +50,7 @@ public class PaneponPanel : MonoBehaviour
     const float SWAP_TIME = 4.0f / 60.0f;
 
     //落下の最大速度(1秒間に落下するマスの数)
-    const float MAX_FALL_SPEED = 10.0f;
+    const float MAX_FALL_SPEED = 60.0f / 4.0f;
 
     //発光時間(1秒)
     const float FLASH_TIME = 1f;
