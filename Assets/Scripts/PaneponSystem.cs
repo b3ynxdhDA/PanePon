@@ -10,7 +10,7 @@ public class PaneponSystem : MonoBehaviour
     InputSystem _inputSystem;
 
     const int FIELD_SIZE_X = 6;
-    const int FIELD_SIZE_Y_BASE = 6;
+    const int FIELD_SIZE_Y_BASE = 12;
     const int FIELD_SIZE_Y = 15;
 
     //パネルのプレハブのもと
@@ -21,9 +21,6 @@ public class PaneponSystem : MonoBehaviour
 
     //パネル全体の位置を制御するやつ
     [SerializeField] private GameObject _panelRoot = null;
-
-    //1番下のパネルを隠すカード
-    [SerializeField] private GameObject _bottomQuad = null;
 
     //カーソルのプレハブ
     [SerializeField] private GameObject _cursorPrefab = null;
@@ -73,9 +70,6 @@ public class PaneponSystem : MonoBehaviour
     private float _scrollSpeed = 0.2f;
     private float _scrollRaio = 0;
 
-    //BottomQardの初期位置
-    private Vector3 _bottomQardPos = new Vector3(2.5f, 0f, -0.55f);
-
     //カーソル
     private GameObject _cursolL = null;
     private GameObject _cursolR = null;
@@ -86,6 +80,9 @@ public class PaneponSystem : MonoBehaviour
 
     //パネルを消せる最小数
     const int MIN_ERASE_COUNT = 3;
+
+    //判定しない最下段の数
+    const int _BOTTOM_ROW = 1;
 
     #endregion
     private void Awake()
@@ -107,7 +104,7 @@ public class PaneponSystem : MonoBehaviour
         }
 
         //初期状態のパネルの配置
-        for (int i = 0; i < FIELD_SIZE_Y_BASE; i++)
+        for (int i = 0; i < FIELD_SIZE_Y_BASE / 2; i++)
         {
             for(int j = 0;j < FIELD_SIZE_X; j++)
             {
@@ -122,10 +119,6 @@ public class PaneponSystem : MonoBehaviour
                 _fieldPanels[i, j] = newPanel;
             }
         }
-
-        //BottomQardの位置を初期化
-        _bottomQuad.transform.localPosition = _bottomQardPos;
-        _bottomQuad.transform.SetParent(_panelRoot.transform);
 
         //カーソルの用意
         _cursolL = GameObject.Instantiate<GameObject>(_cursorPrefab);
@@ -164,7 +157,7 @@ public class PaneponSystem : MonoBehaviour
             deltaX--;
         }
         _corsorPosX = Mathf.Clamp(_corsorPosX + deltaX, 0, 4);
-        _corsorPosY = Mathf.Clamp(_corsorPosY + deltaY, 0, FIELD_SIZE_Y);
+        _corsorPosY = Mathf.Clamp(_corsorPosY + deltaY, _BOTTOM_ROW, FIELD_SIZE_Y_BASE);
         MoveCursor(_corsorPosX, _corsorPosY);
 
         //パネル入れ替え処理
@@ -216,7 +209,10 @@ public class PaneponSystem : MonoBehaviour
         CheckAllPanels();
 
         //スクロール処理
-        _scrollRaio += _scrollSpeed * Time.deltaTime;
+        if (!IsSomePanelErasing())
+        {
+            _scrollRaio += _scrollSpeed * Time.deltaTime;
+        }
         if (_scrollRaio >= 1.0f)
         {
             //スクロール割合をリセット
@@ -301,7 +297,7 @@ public class PaneponSystem : MonoBehaviour
     /// </summary>
     private void CheckErase()
     {
-        for (int i = 0; i < FIELD_SIZE_Y; i++)
+        for (int i = _BOTTOM_ROW; i < FIELD_SIZE_Y; i++)
         {
             for (int j = 0; j < FIELD_SIZE_X; j++)
             {
@@ -314,7 +310,7 @@ public class PaneponSystem : MonoBehaviour
         }
     }
     /// <summary>
-    /// 横方向に何個そろっているか
+    /// 右方向に何個そろっているか
     /// </summary>
     /// <param name="_x"></param>
     /// <param name="_y"></param>
@@ -339,7 +335,7 @@ public class PaneponSystem : MonoBehaviour
         return n;
     }
     /// <summary>
-    /// 縦方向に何個そろっているか
+    /// 上方向に何個そろっているか
     /// </summary>
     /// <param name="_x"></param>
     /// <param name="_y"></param>
@@ -501,6 +497,62 @@ public class PaneponSystem : MonoBehaviour
                 }
             }
         }
+    }
+    /// <summary>
+    /// いずれかのパネルが消えている最中か
+    /// @if文を減らすために処理がややこしくなってるs
+    /// </summary>
+    /// <returns></returns>
+    public bool IsSomePanelErasing()
+    {
+        for (int y = 0; y < FIELD_SIZE_Y; y++)
+        {
+            for (int x = 0; x < FIELD_SIZE_X; x++)
+            {
+                if (IsSomePanelErasingIF(y, x))
+                {
+                    return IsSomePanelErasingIF(y, x);
+                }
+
+            }
+        }
+        return false;
+    }
+    /// <summary>
+    /// IsSomePanelErasingの内部処理if文
+    /// @if文を減らすために処理がややこしくなってる
+    /// </summary>
+    /// <returns></returns>
+    private bool IsSomePanelErasingIF(int _y, int _x)
+    {
+        if (_fieldPanels[_y, _x])
+        {
+            PanelState state = _fieldPanels[_y, _x].state;
+            if (state == PanelState.Flash || state == PanelState.Erase)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    /// <summary>
+    /// ゲームオーバーになる条件かどうか
+    /// @途中11/21
+    /// </summary>
+    /// <returns></returns>
+    public bool IsGameOverCondition()
+    {
+        for (int y = FIELD_SIZE_Y_BASE; y < FIELD_SIZE_Y; y++)
+        {
+            for (int x = 0; x < FIELD_SIZE_X; x++)
+            {
+                if (_fieldPanels[y, x] && _fieldPanels[y, x].state == PanelState.Stable)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     #endregion
 }
