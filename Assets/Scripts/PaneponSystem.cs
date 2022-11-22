@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// パネポンのフィールド全体を管理するクラス
+/// </summary>
 public class PaneponSystem : MonoBehaviour
 {
     #region 変数
@@ -64,11 +67,17 @@ public class PaneponSystem : MonoBehaviour
     //private PanelState[,] _fieldPanelsState = new PanelState[FIELD_SIZE_Y,FIELD_SIZE_X];
 
     //影響しているパネルへの参照
-    private PaneponPanel[,] _fieldPanels = new PaneponPanel[FIELD_SIZE_Y,FIELD_SIZE_X];
+    private PaneponPanel[,] _fieldPanels = new PaneponPanel[FIELD_SIZE_Y, FIELD_SIZE_X];
 
     //パネルを下から出現させる
-    private float _scrollSpeed = 0.2f;
+    private float _scrollSpeed = 0.1f;
     private float _scrollRaio = 0;
+
+    //連鎖数
+    private int _chainCount = 0;
+
+    //連鎖カウントを加算していいか
+    private bool isIncreaseChainCount = false;
 
     //カーソル
     private GameObject _cursolL = null;
@@ -94,7 +103,7 @@ public class PaneponSystem : MonoBehaviour
     void Start()
     {
         //プレハブとマテリアルを用意する
-        for(int i = 0; i < _panelTextureList.Count; i++)
+        for (int i = 0; i < _panelTextureList.Count; i++)
         {
             _panelPrefabList.Add(GameObject.Instantiate<PaneponPanel>(_panelPurefab));
             _panelMaterialList.Add(GameObject.Instantiate<Material>(_panelPrefabList[i].meshRenderer.material));
@@ -106,7 +115,7 @@ public class PaneponSystem : MonoBehaviour
         //初期状態のパネルの配置
         for (int i = 0; i < FIELD_SIZE_Y_BASE / 2; i++)
         {
-            for(int j = 0;j < FIELD_SIZE_X; j++)
+            for (int j = 0; j < FIELD_SIZE_X; j++)
             {
                 //パネルの実体
                 PanelColor color = (PanelColor)Random.Range(0, _panelPrefabList.Count);
@@ -144,15 +153,15 @@ public class PaneponSystem : MonoBehaviour
         {
             deltaY++;
         }
-        if(_inputSystem.Player.Down.triggered)
+        if (_inputSystem.Player.Down.triggered)
         {
             deltaY--;
         }
-        if(_inputSystem.Player.Right.triggered)
+        if (_inputSystem.Player.Right.triggered)
         {
             deltaX++;
         }
-        if(_inputSystem.Player.Left.triggered)
+        if (_inputSystem.Player.Left.triggered)
         {
             deltaX--;
         }
@@ -182,6 +191,9 @@ public class PaneponSystem : MonoBehaviour
         //パネルがそろっているかどうかの判定
         CheckErase();
 
+        //パネルについている連鎖フラグを切る
+        ResetAllStablePanelChainTargetFlag();
+
         //消滅したパネルを消す処理
 
         if (_inputSystem.Player.Test.triggered)
@@ -205,8 +217,16 @@ public class PaneponSystem : MonoBehaviour
                 }
             }
         }
+
         //全てのパネルをチェック
         CheckAllPanels();
+
+        //ゲームオーバー処理
+        if (IsGameOverCondition())
+        {
+            print("ガメオベラ");
+            return;
+        }
 
         //スクロール処理
         if (!IsSomePanelErasing())
@@ -239,6 +259,7 @@ public class PaneponSystem : MonoBehaviour
             }
         }
         _panelRoot.transform.localPosition = new Vector3(0f, _scrollRaio, 0f);
+
     }
 
     #region メソッド
@@ -297,6 +318,7 @@ public class PaneponSystem : MonoBehaviour
     /// </summary>
     private void CheckErase()
     {
+        isIncreaseChainCount = false;
         for (int i = _BOTTOM_ROW; i < FIELD_SIZE_Y; i++)
         {
             for (int j = 0; j < FIELD_SIZE_X; j++)
@@ -307,6 +329,14 @@ public class PaneponSystem : MonoBehaviour
                 //パネルが消せる場合の処理(Y方向)
                 SameEraseVartical(j, i, CheckSameColorVartical(j, i));
             }
+        }
+        if (isIncreaseChainCount)
+        {
+            _chainCount++;   //連鎖数を実際に加算
+        }
+        else
+        {
+            _chainCount = 1;
         }
     }
     /// <summary>
@@ -319,14 +349,14 @@ public class PaneponSystem : MonoBehaviour
     {
         PanelColor baseColor = GetColor(_x, _y);
         PanelState baseState = GetState(_x, _y);
-        if(baseColor == PanelColor.Max || baseState != PanelState.Stable)
+        if (baseColor == PanelColor.Max || baseState != PanelState.Stable)
         {
             return 0;
         }
         int n = 0;
-        for(int x = _x; x < FIELD_SIZE_X; x++)
+        for (int x = _x; x < FIELD_SIZE_X; x++)
         {
-            if(baseColor != GetColor(x, _y) || baseState != GetState(x, _y))
+            if (baseColor != GetColor(x, _y) || baseState != GetState(x, _y))
             {
                 break;
             }
@@ -371,7 +401,12 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int k = 0; k < n; k++)
             {
+                if(_fieldPanels[_y, _x + k].isCahainTarget)
+                {
+                    isIncreaseChainCount = true;
+                }
                 _fieldPanels[_y, _x + k].StartErase();
+                SetChainTarget(_y, _x + k);
             }
         }
     }
@@ -387,7 +422,12 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int k = 0; k < n; k++)
             {
+                if (_fieldPanels[_y + k, _x].isCahainTarget)
+                {
+                    isIncreaseChainCount = true;
+                }
                 _fieldPanels[_y + k, _x].StartErase();
+                SetChainTarget(_y + k, _x);
             }
         }
     }
@@ -399,11 +439,11 @@ public class PaneponSystem : MonoBehaviour
     /// <returns></returns>
     PanelColor GetColor(int _x, int _y)
     {
-        if(_x < 0 || FIELD_SIZE_X <= _x || _y < 0 || FIELD_SIZE_Y <= _y)
+        if (_x < 0 || FIELD_SIZE_X <= _x || _y < 0 || FIELD_SIZE_Y <= _y)
         {
             return PanelColor.Max;
         }
-        return (_fieldPanels[_y, _x] ? _fieldPanels[_y, _x].color : PanelColor.Max); 
+        return (_fieldPanels[_y, _x] ? _fieldPanels[_y, _x].color : PanelColor.Max);
     }
     /// <summary>
     /// パネルのStateを取得
@@ -427,11 +467,11 @@ public class PaneponSystem : MonoBehaviour
     /// <returns></returns>
     public PanelState GetPanelState(int _x, int _y)
     {
-        if(_y < 0 || _y >= FIELD_SIZE_Y)
+        if (_y < 0 || _y >= FIELD_SIZE_Y)
         {
             return PaneponSystem.PanelState.Stable;
         }
-        if(_fieldPanels[_y, _x] == null)
+        if (_fieldPanels[_y, _x] == null)
         {
             return PaneponSystem.PanelState.None;
         }
@@ -473,7 +513,7 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if(_fieldPanels[y, x] && _fieldPanels[y, x].state == PanelState.None)
+                if (_fieldPanels[y, x] && _fieldPanels[y, x].state == PanelState.None)
                 {
                     Destroy(_fieldPanels[y, x]);
                     _fieldPanels[y, x] = null;
@@ -500,7 +540,7 @@ public class PaneponSystem : MonoBehaviour
     }
     /// <summary>
     /// いずれかのパネルが消えている最中か
-    /// @if文を減らすために処理がややこしくなってるs
+    /// @if文を減らすために処理がややこしくなってる
     /// </summary>
     /// <returns></returns>
     public bool IsSomePanelErasing()
@@ -509,11 +549,18 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if (IsSomePanelErasingIF(y, x))
+                /*if (IsSomePanelErasingIF(y, x))
                 {
                     return IsSomePanelErasingIF(y, x);
+                }*/
+                if (_fieldPanels[y, x])
+                {
+                    PanelState state = _fieldPanels[y, x].state;
+                    if (state == PanelState.Flash || state == PanelState.Erase)
+                    {
+                        return true;
+                    }
                 }
-
             }
         }
         return false;
@@ -537,7 +584,7 @@ public class PaneponSystem : MonoBehaviour
     }
     /// <summary>
     /// ゲームオーバーになる条件かどうか
-    /// @途中11/21
+    /// @
     /// </summary>
     /// <returns></returns>
     public bool IsGameOverCondition()
@@ -546,13 +593,61 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if (_fieldPanels[y, x] && _fieldPanels[y, x].state == PanelState.Stable)
+                if (_fieldPanels[y, x])
                 {
-                    return true;
+                    PanelState state = _fieldPanels[y, x].state;
+                    if (state == PanelState.Stable)
+                    {
+                        return true;
+                    }
                 }
             }
         }
         return false;
+    }
+    /// <summary>
+    /// 連鎖対象フラグを設定
+    /// </summary>
+    /// <param name="_y"></param>
+    /// <param name="_x"></param>
+    void SetChainTarget(int _y, int _x)
+    {
+        //上に向かってパネルを捜査してStableのパネルのみにフラグを設定
+        for (int y = _y + 1; y < FIELD_SIZE_Y; y++)
+        {
+            if (_fieldPanels[y, _x])
+            {
+                PanelState state = _fieldPanels[y, _x].state;
+                if (state == PanelState.Stable)
+                {
+                    _fieldPanels[y, _x].isCahainTarget = true;
+                }
+                else
+                {
+                    return;
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// 着地しているパネルの連鎖対象フラグををOFF
+    /// </summary>
+    void ResetAllStablePanelChainTargetFlag()
+    {
+        for (int y = FIELD_SIZE_Y_BASE; y < FIELD_SIZE_Y; y++)
+        {
+            for (int x = 0; x < FIELD_SIZE_X; x++)
+            {
+                if (_fieldPanels[y, x])
+                {
+                    PanelState state = _fieldPanels[y, x].state;
+                    if (state == PanelState.Stable)
+                    {
+                        _fieldPanels[y, x].isCahainTarget = false;
+                    }
+                }
+            }
+        }
     }
     #endregion
 }

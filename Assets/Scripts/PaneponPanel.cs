@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// パネル一つ一つの状態を管理するクラス
+/// </summary>
 public class PaneponPanel : MonoBehaviour
 {
     #region 変数
@@ -28,6 +31,10 @@ public class PaneponPanel : MonoBehaviour
     //パネルの色
     private PaneponSystem.PanelColor _color = PaneponSystem.PanelColor.Max;
     public PaneponSystem.PanelColor color { get { return _color; } }
+
+    //連鎖対象フラグ
+    private bool _isChainTarget = false;
+    public bool isCahainTarget { get { return _isChainTarget; } set { _isChainTarget = value; } }
 
     //移動元の位置
     private int _posX = 0;
