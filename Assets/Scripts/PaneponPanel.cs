@@ -191,7 +191,7 @@ public class PaneponPanel : MonoBehaviour
     }
     /// <summary>
     /// 落下判定
-    /// @パネルによって落下速度が違う
+    /// @パネルによって落下速度が違うことがある
     /// </summary>
     public bool CheckToFall(bool isOnlyCheckStable)
     {

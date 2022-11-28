@@ -75,6 +75,7 @@ public class PaneponSystem : MonoBehaviour
 
     //連鎖数
     private int _chainCount = 0;
+    public int chainCount { get { return _chainCount; } }
 
     //連鎖カウントを加算していいか
     private bool isIncreaseChainCount = false;
@@ -336,8 +337,9 @@ public class PaneponSystem : MonoBehaviour
         }
         else
         {
-            _chainCount = 1;
+            _chainCount = 1;   //連鎖を1からやり直す
         }
+        print(chainCount);
     }
     /// <summary>
     /// 右方向に何個そろっているか

@@ -63,6 +63,8 @@
     <Compile Include="Assets\Scripts\PaneponPanel.cs" />
     <Compile Include="Assets\Pause\FadeController.cs" />
     <Compile Include="Assets\Pause\Scenes.cs" />
+    <Compile Include="Assets\Scripts\GameManager.cs" />
+    <Compile Include="Assets\PanePonUI.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

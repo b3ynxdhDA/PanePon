@@ -65,6 +65,14 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""ScrolUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""a038d317-9a74-4e0e-a708-b2944c0060e6"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press""
                 }
             ],
             ""bindings"": [
@@ -232,6 +240,28 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""action"": ""Test"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""36de4bfb-df56-4eeb-9e08-39b14f098fcd"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ScrolUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8c4c5a26-87ca-40b8-8e2e-531b9c3a209a"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ScrolUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -246,6 +276,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
         m_Player_Left = m_Player.FindAction("Left", throwIfNotFound: true);
         m_Player_Swap = m_Player.FindAction("Swap", throwIfNotFound: true);
         m_Player_Test = m_Player.FindAction("Test", throwIfNotFound: true);
+        m_Player_ScrolUp = m_Player.FindAction("ScrolUp", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -301,6 +332,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_Left;
     private readonly InputAction m_Player_Swap;
     private readonly InputAction m_Player_Test;
+    private readonly InputAction m_Player_ScrolUp;
     public struct PlayerActions
     {
         private @InputSystem m_Wrapper;
@@ -311,6 +343,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
         public InputAction @Left => m_Wrapper.m_Player_Left;
         public InputAction @Swap => m_Wrapper.m_Player_Swap;
         public InputAction @Test => m_Wrapper.m_Player_Test;
+        public InputAction @ScrolUp => m_Wrapper.m_Player_ScrolUp;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -338,6 +371,9 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @Test.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTest;
                 @Test.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTest;
                 @Test.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTest;
+                @ScrolUp.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnScrolUp;
+                @ScrolUp.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnScrolUp;
+                @ScrolUp.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnScrolUp;
             }
             m_Wrapper.m_PlayerActionsCallbackInterface = instance;
             if (instance != null)
@@ -360,6 +396,9 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @Test.started += instance.OnTest;
                 @Test.performed += instance.OnTest;
                 @Test.canceled += instance.OnTest;
+                @ScrolUp.started += instance.OnScrolUp;
+                @ScrolUp.performed += instance.OnScrolUp;
+                @ScrolUp.canceled += instance.OnScrolUp;
             }
         }
     }
@@ -372,5 +411,6 @@ public class @InputSystem : IInputActionCollection, IDisposable
         void OnLeft(InputAction.CallbackContext context);
         void OnSwap(InputAction.CallbackContext context);
         void OnTest(InputAction.CallbackContext context);
+        void OnScrolUp(InputAction.CallbackContext context);
     }
 }
