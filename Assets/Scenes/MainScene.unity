@@ -315,6 +315,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dc28c50c09d67944988575a1a0c42f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _panePonUI: {fileID: 2014067131}
   _panelPurefab: {fileID: 4652459716376703544, guid: 6985b80475b162f40994446e8d00ede3, type: 3}
   _panelTextureList:
   - {fileID: 2800000, guid: c38b829a1f239eb4584e6afff12e3344, type: 3}
@@ -944,6 +945,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2f67da212e291e41b65ccd1d8047ae7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _chainCount: 0
+  _isSomePanelErasing: 0
   _gameOverText: {fileID: 1379566388}
   _chainCountText: {fileID: 503667701}
 --- !u!1001 &3112992631294960666

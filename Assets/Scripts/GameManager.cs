@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class GameManager : MonoBehaviour
 {
+    //
     private GameManager _instance = null;
     public GameManager instance { get { return _instance; } }
 

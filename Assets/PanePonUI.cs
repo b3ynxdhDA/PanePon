@@ -9,8 +9,17 @@ using UnityEngine.UI;
 /// </summary>
 public class PanePonUI : MonoBehaviour
 {
+    private PanePonUI instance = null;
+    public PanePonUI Instance { get { return instance; } }
+
+    //連鎖数
+    public int _chainCount = 0;
+
+    //パネルが連載中かどうか
+    public bool _isSomePanelErasing = false;
+
     //ゲームオーバーテキスト
-    [SerializeField] private Text _gameOverText = default;
+    [SerializeField] private Text _gameOverText = null;
 
     //連鎖カウントテキスト
     [SerializeField] private Text _chainCountText = default;
@@ -22,6 +31,7 @@ public class PanePonUI : MonoBehaviour
 
     void Update()
     {
-
+        _chainCountText.gameObject.SetActive(_isSomePanelErasing);
+        _chainCountText.text = "" + _chainCount;
     }
 }

@@ -129,6 +129,10 @@ public class PaneponPanel : MonoBehaviour
                     //ステート遷移 
                     _state = PaneponSystem.PanelState.None;
                     _stateTimer = 0f;
+
+                    //連鎖対象フラグを設定
+                    _system.SetChainTarget(_posY, _posX);
+
                     //全体のパネルの落下判定
                     _system.CheckAllPanels();
                 }

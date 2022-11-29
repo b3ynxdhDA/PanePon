@@ -12,6 +12,9 @@ public class PaneponSystem : MonoBehaviour
     //インプットシステム
     InputSystem _inputSystem;
 
+    //PanePonUI   @newがよくないらしい
+    [SerializeField] private PanePonUI _panePonUI = null;
+
     const int FIELD_SIZE_X = 6;
     const int FIELD_SIZE_Y_BASE = 12;
     const int FIELD_SIZE_Y = 15;
@@ -70,12 +73,11 @@ public class PaneponSystem : MonoBehaviour
     private PaneponPanel[,] _fieldPanels = new PaneponPanel[FIELD_SIZE_Y, FIELD_SIZE_X];
 
     //パネルを下から出現させる
-    private float _scrollSpeed = 0.1f;
+    private float _scrollSpeed = 0.5f;
     private float _scrollRaio = 0;
 
     //連鎖数
-    private int _chainCount = 0;
-    public int chainCount { get { return _chainCount; } }
+    //private int _chainCount = 0;
 
     //連鎖カウントを加算していいか
     private bool isIncreaseChainCount = false;
@@ -189,8 +191,7 @@ public class PaneponSystem : MonoBehaviour
         }
 
 
-        //パネルがそろっているかどうかの判定
-        CheckErase();
+
 
         //パネルについている連鎖フラグを切る
         ResetAllStablePanelChainTargetFlag();
@@ -228,6 +229,12 @@ public class PaneponSystem : MonoBehaviour
             print("ガメオベラ");
             return;
         }
+
+        //パネルがそろっているかどうかの判定
+        CheckErase();
+
+        //パネルの連鎖対象フラグをOFF
+        ResetAllStablePanelChainTargetFlag();
 
         //スクロール処理
         if (!IsSomePanelErasing())
@@ -331,15 +338,18 @@ public class PaneponSystem : MonoBehaviour
                 SameEraseVartical(j, i, CheckSameColorVartical(j, i));
             }
         }
+
+        _panePonUI._isSomePanelErasing = IsSomePanelErasing();
         if (isIncreaseChainCount)
         {
-            _chainCount++;   //連鎖数を実際に加算
+            //_chainCount++;   
+            _panePonUI._chainCount++;  //連鎖数を実際に加算
         }
-        else
+        else if(!IsSomePanelErasing())
         {
-            _chainCount = 1;   //連鎖を1からやり直す
+            //_chainCount = 1;   
+            _panePonUI._chainCount = 1;    //連鎖を1からやり直す
         }
-        print(chainCount);
     }
     /// <summary>
     /// 右方向に何個そろっているか
@@ -405,7 +415,7 @@ public class PaneponSystem : MonoBehaviour
             {
                 if(_fieldPanels[_y, _x + k].isCahainTarget)
                 {
-                    isIncreaseChainCount = true;
+                    isIncreaseChainCount = true;    //連鎖数を加算
                 }
                 _fieldPanels[_y, _x + k].StartErase();
                 SetChainTarget(_y, _x + k);
@@ -426,7 +436,7 @@ public class PaneponSystem : MonoBehaviour
             {
                 if (_fieldPanels[_y + k, _x].isCahainTarget)
                 {
-                    isIncreaseChainCount = true;
+                    isIncreaseChainCount = true;    //連鎖数を加算
                 }
                 _fieldPanels[_y + k, _x].StartErase();
                 SetChainTarget(_y + k, _x);
@@ -612,7 +622,7 @@ public class PaneponSystem : MonoBehaviour
     /// </summary>
     /// <param name="_y"></param>
     /// <param name="_x"></param>
-    void SetChainTarget(int _y, int _x)
+    public void SetChainTarget(int _y, int _x)
     {
         //上に向かってパネルを捜査してStableのパネルのみにフラグを設定
         for (int y = _y + 1; y < FIELD_SIZE_Y; y++)
@@ -628,6 +638,10 @@ public class PaneponSystem : MonoBehaviour
                 {
                     return;
                 }
+            }
+            else
+            {
+                return;
             }
         }
     }
