@@ -8,9 +8,19 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class GameManager : MonoBehaviour
 {
-    //
     private GameManager _instance = null;
-    public GameManager instance { get { return _instance; } }
+    public GameManager instance { get { return _instance; } set { _instance = value; } }
+
+    //ゲームの状態
+    private GameManager.GameState _game_State = GameManager.GameState.Title;
+    public GameManager.GameState game_State { get { return _game_State; } set { _game_State = value; } }
+    public enum GameState
+    {
+        Title,
+        Select,
+        Game,
+        Result,
+    };
 
     private void Awake()
     {
@@ -24,13 +34,19 @@ public class GameManager : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
-    void Start()
-    {
-        
-    }
 
     void Update()
     {
-        
+        switch (_game_State)
+        {
+            case GameState.Title:
+                break;
+            case GameState.Select:
+                break;
+            case GameState.Game:
+                break;
+            case GameState.Result:
+                break;
+        }
     }
 }

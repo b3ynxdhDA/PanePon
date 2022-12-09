@@ -59,7 +59,15 @@
                     "id": "a038d317-9a74-4e0e-a708-b2944c0060e6",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press"
+                    "interactions": "Press(behavior=2)"
+                },
+                {
+                    "name": "Esc",
+                    "type": "Button",
+                    "id": "82a1ddcc-74c0-442e-a558-39d999741833",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(behavior=2)"
                 }
             ],
             "bindings": [
@@ -247,6 +255,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "ScrolUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4c7c1fa4-aba2-40b2-90ec-99d8d30eb70a",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ScrolUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2b4e9e7a-b73f-43e6-8110-eefe5fbc6262",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Esc",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

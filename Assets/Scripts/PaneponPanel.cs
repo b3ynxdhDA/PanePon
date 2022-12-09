@@ -20,13 +20,13 @@ public class PaneponPanel : MonoBehaviour
     public MeshRenderer meshRenderer { get { return _meshRenderer; } set { _meshRenderer = value; } }
 
     //パネルの状態
-    private PaneponSystem.PanelState _state = PaneponSystem.PanelState.Stable;
-    public PaneponSystem.PanelState state { get { return _state; } }
+    private PaneponSystem.PanelState _panel_State = PaneponSystem.PanelState.Stable;
+    public PaneponSystem.PanelState panel_State { get { return _panel_State; } }
 
     //パネルの状態が入れ替え可能かどうか
-    public bool _isSwapSble { get { return (_state == PaneponSystem.PanelState.None || 
-                                            _state == PaneponSystem.PanelState.Stable || 
-                                            _state == PaneponSystem.PanelState.Fall); } }
+    public bool _isSwapSble { get { return (_panel_State == PaneponSystem.PanelState.None || 
+                                            _panel_State == PaneponSystem.PanelState.Stable || 
+                                            _panel_State == PaneponSystem.PanelState.Fall); } }
 
     //パネルの色
     private PaneponSystem.PanelColor _color = PaneponSystem.PanelColor.Max;
@@ -72,7 +72,7 @@ public class PaneponPanel : MonoBehaviour
     void Start()
     {
         //ステートのデフォルトは静止状態
-        _state = PaneponSystem.PanelState.Stable;
+        _panel_State = PaneponSystem.PanelState.Stable;
 
         //デフォルトはエフェクトOFF
         SetEffectVisible(false);
@@ -81,7 +81,7 @@ public class PaneponPanel : MonoBehaviour
 
     public void  UpdateManual()
     {
-        switch (_state)
+        switch (_panel_State)
         {
             case PaneponSystem.PanelState.Swap:
                 //割合を加算
@@ -109,7 +109,7 @@ public class PaneponPanel : MonoBehaviour
                 if (_stateTimer >= FLASH_TIME)
                 {
                     //ステート遷移 
-                    _state = PaneponSystem.PanelState.Erase;
+                    _panel_State = PaneponSystem.PanelState.Erase;
                     _stateTimer = 0f;
                 }
                 break;
@@ -127,7 +127,7 @@ public class PaneponPanel : MonoBehaviour
                     //MeshRendererをOFF
                     _meshRenderer.enabled = false;
                     //ステート遷移 
-                    _state = PaneponSystem.PanelState.None;
+                    _panel_State = PaneponSystem.PanelState.None;
                     _stateTimer = 0f;
 
                     //連鎖対象フラグを設定
@@ -147,7 +147,7 @@ public class PaneponPanel : MonoBehaviour
                     //位置を直接設定
                     float moveRatioTmp = _moveRatio;
                     SetPosition(_moveDestX, _moveDestY);
-                    if (_state == PaneponSystem.PanelState.Fall)
+                    if (_panel_State == PaneponSystem.PanelState.Fall)
                     {
                         _moveRatio = moveRatioTmp - 1f;
                         //移動処理
@@ -200,7 +200,7 @@ public class PaneponPanel : MonoBehaviour
     public bool CheckToFall(bool isOnlyCheckStable)
     {
         //安定状態でない場合は行わない
-        if (isOnlyCheckStable && _state != PaneponSystem.PanelState.Stable)
+        if (isOnlyCheckStable && _panel_State != PaneponSystem.PanelState.Stable)
         {
             return false;
         }
@@ -214,7 +214,7 @@ public class PaneponPanel : MonoBehaviour
         }
         else
         {
-            _state = PaneponSystem.PanelState.Stable;
+            _panel_State = PaneponSystem.PanelState.Stable;
         }
         return false;
     }
@@ -237,7 +237,7 @@ public class PaneponPanel : MonoBehaviour
         _moveDestY = destY;
 
         //ステート遷移
-        _state = PaneponSystem.PanelState.Swap;
+        _panel_State = PaneponSystem.PanelState.Swap;
     }
     /// <summary>
     /// 落下後の位置を設定
@@ -254,7 +254,7 @@ public class PaneponPanel : MonoBehaviour
         _moveDestY = _posY - 1;
 
         //ステート遷移
-        _state = PaneponSystem.PanelState.Fall;
+        _panel_State = PaneponSystem.PanelState.Fall;
     }
     /// <summary>
     /// ブロックを消す処理を開始する
@@ -262,12 +262,12 @@ public class PaneponPanel : MonoBehaviour
     public void StartErase()
     {
         //Stableでない場合は行わない
-        if(_state != PaneponSystem.PanelState.Stable)
+        if(_panel_State != PaneponSystem.PanelState.Stable)
         {
             return;
         }
         //ステート遷移
-        _state = PaneponSystem.PanelState.Flash;
+        _panel_State = PaneponSystem.PanelState.Flash;
     }
     /// <summary>
     /// エフェクトの可視性を設定

@@ -12,8 +12,11 @@ public class PaneponSystem : MonoBehaviour
     //インプットシステム
     InputSystem _inputSystem;
 
-    //PanePonUI   @newがよくないらしい
+    //PanePonUI   @スクリプトがMonoBehaviourを継承しているとnewが使えない
     [SerializeField] private PanePonUI _panePonUI = null;
+
+    //GameManager
+    GameManager gameManager = null;
 
     const int FIELD_SIZE_X = 6;
     const int FIELD_SIZE_Y_BASE = 12;
@@ -54,6 +57,7 @@ public class PaneponSystem : MonoBehaviour
         Stable,  //停止中
         Swap,    //入れ替え中
         Flash,   //発光中
+        FlashStay,   //発光待ち
         Erase,   //消滅中
         Fall,    //落下中
 
@@ -72,9 +76,17 @@ public class PaneponSystem : MonoBehaviour
     //影響しているパネルへの参照
     private PaneponPanel[,] _fieldPanels = new PaneponPanel[FIELD_SIZE_Y, FIELD_SIZE_X];
 
-    //パネルを下から出現させる
-    private float _scrollSpeed = 0.5f;
+    //スクロールスピード
+    private float _scrollSpeed = 0.3f;
     private float _scrollRaio = 0;
+
+    //直前のスピードを保持
+    private float _scrollSpeedTmp = 0;
+
+    //
+    private bool _onScrollButton = false;
+    //スクロールの加速
+    const float FAST_SCROLL = 1f;
 
     //連鎖数
     //private int _chainCount = 0;
@@ -99,6 +111,7 @@ public class PaneponSystem : MonoBehaviour
     #endregion
     private void Awake()
     {
+        gameManager = GameObject.FindWithTag("GameController").GetComponent<GameManager>();
         _inputSystem = new InputSystem();
         _inputSystem.Enable();
     }
@@ -190,8 +203,19 @@ public class PaneponSystem : MonoBehaviour
             _fieldPanels[_corsorPosY, _corsorPosX + 1] = tmp;
         }
 
-
-
+        //スクロールupが押されたら
+        if (_inputSystem.Player.ScrolUp.triggered && !_onScrollButton)
+        {
+            _scrollSpeedTmp = _scrollSpeed;
+            _scrollSpeed = FAST_SCROLL;
+            _onScrollButton = true;
+        }
+        //スクロールupを離したら
+        else if (_inputSystem.Player.ScrolUp.triggered && _onScrollButton)
+        {
+            _scrollSpeed = _scrollSpeedTmp;
+            _onScrollButton = false;
+        }
 
         //パネルについている連鎖フラグを切る
         ResetAllStablePanelChainTargetFlag();
@@ -290,7 +314,7 @@ public class PaneponSystem : MonoBehaviour
                 }
                 else
                 {
-                    print(_fieldPanels[y, x].state + "  " + _fieldPanels[y, x].color);
+                    print(_fieldPanels[y, x].panel_State + "  " + _fieldPanels[y, x].color);
                 }
             }
         }
@@ -342,12 +366,10 @@ public class PaneponSystem : MonoBehaviour
         _panePonUI._isSomePanelErasing = IsSomePanelErasing();
         if (isIncreaseChainCount)
         {
-            //_chainCount++;   
             _panePonUI._chainCount++;  //連鎖数を実際に加算
         }
         else if(!IsSomePanelErasing())
-        {
-            //_chainCount = 1;   
+        { 
             _panePonUI._chainCount = 1;    //連鎖を1からやり直す
         }
     }
@@ -418,7 +440,6 @@ public class PaneponSystem : MonoBehaviour
                     isIncreaseChainCount = true;    //連鎖数を加算
                 }
                 _fieldPanels[_y, _x + k].StartErase();
-                SetChainTarget(_y, _x + k);
             }
         }
     }
@@ -439,7 +460,6 @@ public class PaneponSystem : MonoBehaviour
                     isIncreaseChainCount = true;    //連鎖数を加算
                 }
                 _fieldPanels[_y + k, _x].StartErase();
-                SetChainTarget(_y + k, _x);
             }
         }
     }
@@ -449,7 +469,7 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="_x"></param>
     /// <param name="_y"></param>
     /// <returns></returns>
-    PanelColor GetColor(int _x, int _y)
+    private PanelColor GetColor(int _x, int _y)
     {
         if (_x < 0 || FIELD_SIZE_X <= _x || _y < 0 || FIELD_SIZE_Y <= _y)
         {
@@ -463,13 +483,13 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="_x"></param>
     /// <param name="_y"></param>
     /// <returns></returns>
-    PanelState GetState(int _x, int _y)
+    private PanelState GetState(int _x, int _y)
     {
         if (_x < 0 || FIELD_SIZE_X <= _x || _y < 0 || FIELD_SIZE_Y <= _y)
         {
             return PanelState.Max;
         }
-        return (_fieldPanels[_y, _x] ? _fieldPanels[_y, _x].state : PanelState.Max);
+        return (_fieldPanels[_y, _x] ? _fieldPanels[_y, _x].panel_State : PanelState.Max);
     }
     /// <summary>
     /// パネルの状態を取得
@@ -487,7 +507,7 @@ public class PaneponSystem : MonoBehaviour
         {
             return PaneponSystem.PanelState.None;
         }
-        return _fieldPanels[_y, _x].state;
+        return _fieldPanels[_y, _x].panel_State;
     }
     /// <summary>
     /// パネルを配列内でも落下させる
@@ -525,7 +545,7 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if (_fieldPanels[y, x] && _fieldPanels[y, x].state == PanelState.None)
+                if (_fieldPanels[y, x] && _fieldPanels[y, x].panel_State == PanelState.None)
                 {
                     Destroy(_fieldPanels[y, x]);
                     _fieldPanels[y, x] = null;
@@ -567,7 +587,7 @@ public class PaneponSystem : MonoBehaviour
                 }*/
                 if (_fieldPanels[y, x])
                 {
-                    PanelState state = _fieldPanels[y, x].state;
+                    PanelState state = _fieldPanels[y, x].panel_State;
                     if (state == PanelState.Flash || state == PanelState.Erase)
                     {
                         return true;
@@ -586,7 +606,7 @@ public class PaneponSystem : MonoBehaviour
     {
         if (_fieldPanels[_y, _x])
         {
-            PanelState state = _fieldPanels[_y, _x].state;
+            PanelState state = _fieldPanels[_y, _x].panel_State;
             if (state == PanelState.Flash || state == PanelState.Erase)
             {
                 return true;
@@ -607,7 +627,7 @@ public class PaneponSystem : MonoBehaviour
             {
                 if (_fieldPanels[y, x])
                 {
-                    PanelState state = _fieldPanels[y, x].state;
+                    PanelState state = _fieldPanels[y, x].panel_State;
                     if (state == PanelState.Stable)
                     {
                         return true;
@@ -629,7 +649,7 @@ public class PaneponSystem : MonoBehaviour
         {
             if (_fieldPanels[y, _x])
             {
-                PanelState state = _fieldPanels[y, _x].state;
+                PanelState state = _fieldPanels[y, _x].panel_State;
                 if (state == PanelState.Stable)
                 {
                     _fieldPanels[y, _x].isCahainTarget = true;
@@ -650,13 +670,13 @@ public class PaneponSystem : MonoBehaviour
     /// </summary>
     void ResetAllStablePanelChainTargetFlag()
     {
-        for (int y = FIELD_SIZE_Y_BASE; y < FIELD_SIZE_Y; y++)
+        for (int y = _BOTTOM_ROW; y < FIELD_SIZE_Y; y++)
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
                 if (_fieldPanels[y, x])
                 {
-                    PanelState state = _fieldPanels[y, x].state;
+                    PanelState state = _fieldPanels[y, x].panel_State;
                     if (state == PanelState.Stable)
                     {
                         _fieldPanels[y, x].isCahainTarget = false;

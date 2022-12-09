@@ -57,7 +57,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\PaneponSystem.cs" />
-    <Compile Include="Assets\PanePonUI.cs" />
+    <Compile Include="Assets\Scripts\PanePonUI.cs" />
+    <Compile Include="Assets\Scripts\TitleManager.cs" />
     <Compile Include="Assets\InputSystem.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Pause\Setting.cs" />
