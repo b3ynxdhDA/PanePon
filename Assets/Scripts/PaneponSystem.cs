@@ -57,7 +57,6 @@ public class PaneponSystem : MonoBehaviour
         Stable,  //停止中
         Swap,    //入れ替え中
         Flash,   //発光中
-        FlashStay,   //発光待ち
         Erase,   //消滅中
         Fall,    //落下中
 
@@ -250,7 +249,11 @@ public class PaneponSystem : MonoBehaviour
         //ゲームオーバー処理
         if (IsGameOverCondition())
         {
-            print("ガメオベラ");
+            if(gameManager.game_State != GameManager.GameState.GameOver)
+            {
+                print("ガメオベラ");
+                gameManager.game_State = GameManager.GameState.GameOver;
+            }
             return;
         }
 
@@ -383,14 +386,14 @@ public class PaneponSystem : MonoBehaviour
     {
         PanelColor baseColor = GetColor(_x, _y);
         PanelState baseState = GetState(_x, _y);
-        if (baseColor == PanelColor.Max || baseState != PanelState.Stable)
+        if (baseColor == PanelColor.Max || (baseState != PanelState.Stable/* && baseState != PanelState.Flash*/))
         {
             return 0;
         }
         int n = 0;
         for (int x = _x; x < FIELD_SIZE_X; x++)
         {
-            if (baseColor != GetColor(x, _y) || baseState != GetState(x, _y))
+            if (baseColor != GetColor(x, _y)|| baseState != GetState(x, _y))
             {
                 break;
             }
@@ -408,7 +411,7 @@ public class PaneponSystem : MonoBehaviour
     {
         PanelColor baseColor = GetColor(_x, _y);
         PanelState baseState = GetState(_x, _y);
-        if (baseColor == PanelColor.Max || baseState != PanelState.Stable)
+        if (baseColor == PanelColor.Max || (baseState != PanelState.Stable/* && baseState != PanelState.Flash*/))
         {
             return 0;
         }
@@ -615,8 +618,8 @@ public class PaneponSystem : MonoBehaviour
         return false;
     }
     /// <summary>
-    /// ゲームオーバーになる条件かどうか
-    /// @
+    /// ゲームオーバー判定
+    /// @if文
     /// </summary>
     /// <returns></returns>
     public bool IsGameOverCondition()

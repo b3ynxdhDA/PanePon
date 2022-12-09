@@ -18,8 +18,11 @@ public class GameManager : MonoBehaviour
     {
         Title,
         Select,
-        Game,
+        GameRedy,
+        GameNow,
+        GameOver,
         Result,
+        Pause
     };
 
     private void Awake()
@@ -43,7 +46,11 @@ public class GameManager : MonoBehaviour
                 break;
             case GameState.Select:
                 break;
-            case GameState.Game:
+            case GameState.GameRedy:
+                break;
+            case GameState.GameNow:
+                break;
+            case GameState.GameOver:
                 break;
             case GameState.Result:
                 break;
