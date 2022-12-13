@@ -82,8 +82,9 @@ public class PaneponSystem : MonoBehaviour
     //直前のスピードを保持
     private float _scrollSpeedTmp = 0;
 
-    //
+    //スクロールボタンが押されているか
     private bool _onScrollButton = false;
+
     //スクロールの加速
     const float FAST_SCROLL = 1f;
 
@@ -117,6 +118,9 @@ public class PaneponSystem : MonoBehaviour
 
     void Start()
     {
+        //ゲームのStateをGameRedyに設定
+        gameManager.game_State = GameManager.GameState.GameNow;
+
         //プレハブとマテリアルを用意する
         for (int i = 0; i < _panelTextureList.Count; i++)
         {
@@ -157,6 +161,11 @@ public class PaneponSystem : MonoBehaviour
 
     void Update()
     {
+        if(gameManager.game_State == GameManager.GameState.Pause
+           || gameManager.game_State == GameManager.GameState.GameOver)
+        {
+            return;
+        }
         //Noneのパネルを消す
         DeletEmptyPanel();
 
@@ -185,7 +194,8 @@ public class PaneponSystem : MonoBehaviour
         MoveCursor(_corsorPosX, _corsorPosY);
 
         //パネル入れ替え処理
-        if (_inputSystem.Player.Swap.triggered && IsSwapable())
+        if (_inputSystem.Player.Swap.triggered && IsSwapable()
+            && gameManager.game_State != GameManager.GameState.GameRedy)
         {
             if (_fieldPanels[_corsorPosY, _corsorPosX])
             {
@@ -438,7 +448,9 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int k = 0; k < n; k++)
             {
-                if(_fieldPanels[_y, _x + k].isCahainTarget)
+                //@クラッシュすることがある
+                SameEraseVartical(_x + k, _y, CheckSameColorVartical(_x + k, _y));
+                if (_fieldPanels[_y, _x + k].isCahainTarget)
                 {
                     isIncreaseChainCount = true;    //連鎖数を加算
                 }
@@ -458,6 +470,7 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int k = 0; k < n; k++)
             {
+                SameEraseHorixontal(_x, _y + k, CheckSameColorHorizontal(_x, _y + k));
                 if (_fieldPanels[_y + k, _x].isCahainTarget)
                 {
                     isIncreaseChainCount = true;    //連鎖数を加算

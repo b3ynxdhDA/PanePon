@@ -12,6 +12,9 @@ public class PanePonUI : MonoBehaviour
     private PanePonUI instance = null;
     public PanePonUI Instance { get { return instance; } set { instance = value; } }
 
+    //ゲームスタートのカウント
+    public int _startCount = 0;
+
     //連鎖数
     public int _chainCount = 0;
 

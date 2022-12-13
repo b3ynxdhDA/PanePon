@@ -1,13 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// ゲーム全体の状態を管理するクラス
 /// </summary>
 public class GameManager : MonoBehaviour
 {
+    //インプットシステム
+    InputSystem _inputSystem;
+
     private GameManager _instance = null;
     public GameManager instance { get { return _instance; } set { _instance = value; } }
 
@@ -27,7 +29,10 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if(instance == null)
+        _inputSystem = new InputSystem();
+        _inputSystem.Enable();
+
+        if (instance == null)
         {
             _instance = this;
             DontDestroyOnLoad(this.gameObject);
@@ -40,20 +45,15 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        switch (_game_State)
+        if(_inputSystem.Player.Esc.triggered)
         {
-            case GameState.Title:
-                break;
-            case GameState.Select:
-                break;
-            case GameState.GameRedy:
-                break;
-            case GameState.GameNow:
-                break;
-            case GameState.GameOver:
-                break;
-            case GameState.Result:
-                break;
+#if UNITY_EDITOR
+            //エディターの時は再生をやめる
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            //アプリケーションを終了する
+            Application.Quit();
+#endif
         }
     }
 }
