@@ -109,7 +109,7 @@ public class PaneponPanel : MonoBehaviour
                 if (_stateTimer >= FLASH_TIME)
                 {
                     //ステート遷移 
-                    _panel_State = PaneponSystem.PanelState.Erase;
+                    _panel_State = PaneponSystem.PanelState.EraseWait;
                     _stateTimer = 0f;
                 }
                 break;
@@ -197,12 +197,12 @@ public class PaneponPanel : MonoBehaviour
     /// 落下判定
     /// @パネルによって落下速度が違うことがある
     /// </summary>
-    public bool CheckToFall(bool isOnlyCheckStable)
+    public void CheckToFall(bool isOnlyCheckStable)
     {
         //安定状態でない場合は行わない
         if (isOnlyCheckStable && _panel_State != PaneponSystem.PanelState.Stable)
         {
-            return false;
+            return;
         }
         //移動先の床が無い かつ 移動先より下に隙間があったら落ちる処理に
         PaneponSystem.PanelState panelState = _system.GetPanelState(_posX, _posY - 1);
@@ -210,13 +210,13 @@ public class PaneponPanel : MonoBehaviour
         {
             //落下処理
             Fall();
-            return true;
+            return;
         }
         else
         {
             _panel_State = PaneponSystem.PanelState.Stable;
         }
-        return false;
+        return;
     }
     /// <summary>
     /// 色を設定
@@ -257,9 +257,9 @@ public class PaneponPanel : MonoBehaviour
         _panel_State = PaneponSystem.PanelState.Fall;
     }
     /// <summary>
-    /// ブロックを消す処理を開始する
+    /// ブロックの点滅演出を開始する
     /// </summary>
-    public void StartErase()
+    public void StartFlash()
     {
         //Stableでない場合は行わない
         if(_panel_State != PaneponSystem.PanelState.Stable)
@@ -269,6 +269,20 @@ public class PaneponPanel : MonoBehaviour
         //ステート遷移
         _panel_State = PaneponSystem.PanelState.Flash;
     }
+    /// <summary>
+    /// ブロックを消す処理を開始する
+    /// </summary>
+    public void StartErase()
+    {
+        //Stableでない場合は行わない
+        if(_panel_State != PaneponSystem.PanelState.EraseWait)
+        {
+            return;
+        }
+        //ステート遷移
+        _panel_State = PaneponSystem.PanelState.Erase;
+    }
+    
     /// <summary>
     /// エフェクトの可視性を設定
     /// </summary>

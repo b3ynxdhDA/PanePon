@@ -57,6 +57,7 @@ public class PaneponSystem : MonoBehaviour
         Stable,  //停止中
         Swap,    //入れ替え中
         Flash,   //発光中
+        EraseWait,  //消滅待ち
         Erase,   //消滅中
         Fall,    //落下中
 
@@ -166,8 +167,6 @@ public class PaneponSystem : MonoBehaviour
         {
             return;
         }
-        //Noneのパネルを消す
-        DeletEmptyPanel();
 
         //カーソル移動処理
         int deltaY = 0;
@@ -270,6 +269,9 @@ public class PaneponSystem : MonoBehaviour
         //パネルがそろっているかどうかの判定
         CheckErase();
 
+        //Noneのパネルを消す
+        DeletEmptyPanel();
+
         //パネルの連鎖対象フラグをOFF
         ResetAllStablePanelChainTargetFlag();
 
@@ -364,15 +366,16 @@ public class PaneponSystem : MonoBehaviour
     private void CheckErase()
     {
         isIncreaseChainCount = false;
+        bool isCrossCheck = false;
         for (int i = _BOTTOM_ROW; i < FIELD_SIZE_Y; i++)
         {
             for (int j = 0; j < FIELD_SIZE_X; j++)
             {
                 //パネルが消せる場合の処理(X方向)
-                SameEraseHorixontal(j, i, CheckSameColorHorizontal(j, i));
+                SameEraseHorixontal(j, i, CheckSameColorHorizontal(j, i), isCrossCheck);
 
                 //パネルが消せる場合の処理(Y方向)
-                SameEraseVartical(j, i, CheckSameColorVartical(j, i));
+                SameEraseVartical(j, i, CheckSameColorVartical(j, i), isCrossCheck);
             }
         }
 
@@ -396,7 +399,7 @@ public class PaneponSystem : MonoBehaviour
     {
         PanelColor baseColor = GetColor(_x, _y);
         PanelState baseState = GetState(_x, _y);
-        if (baseColor == PanelColor.Max || (baseState != PanelState.Stable/* && baseState != PanelState.Flash*/))
+        if (baseColor == PanelColor.Max || baseState != PanelState.Stable)
         {
             return 0;
         }
@@ -421,7 +424,7 @@ public class PaneponSystem : MonoBehaviour
     {
         PanelColor baseColor = GetColor(_x, _y);
         PanelState baseState = GetState(_x, _y);
-        if (baseColor == PanelColor.Max || (baseState != PanelState.Stable/* && baseState != PanelState.Flash*/))
+        if (baseColor == PanelColor.Max || baseState != PanelState.Stable)
         {
             return 0;
         }
@@ -442,19 +445,23 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="y"></param>
     /// <param name="x"></param>
     /// <param name="n">そろっている数</param>
-    private void SameEraseHorixontal(int _x, int _y, int n)
+    private void SameEraseHorixontal(int _x, int _y, int n, bool isCross)
     {
         if (n >= MIN_ERASE_COUNT)
         {
             for (int k = 0; k < n; k++)
             {
-                //@クラッシュすることがある
-                SameEraseVartical(_x + k, _y, CheckSameColorVartical(_x + k, _y));
+                /*@クラッシュすることがある
+                if (!isCross)
+                {
+                    SameEraseVartical(_x + k, _y, CheckSameColorVartical(_x + k, _y), true);
+                }
+                */
                 if (_fieldPanels[_y, _x + k].isCahainTarget)
                 {
                     isIncreaseChainCount = true;    //連鎖数を加算
                 }
-                _fieldPanels[_y, _x + k].StartErase();
+                _fieldPanels[_y, _x + k].StartFlash();
             }
         }
     }
@@ -464,18 +471,23 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="y"></param>
     /// <param name="x"></param>
     /// <param name="n">そろっている数</param>
-    private void SameEraseVartical(int _x, int _y, int n)
+    private void SameEraseVartical(int _x, int _y, int n, bool isCross)
     {
         if (n >= MIN_ERASE_COUNT)
         {
             for (int k = 0; k < n; k++)
             {
-                SameEraseHorixontal(_x, _y + k, CheckSameColorHorizontal(_x, _y + k));
+                /*
+                if (!isCross)
+                {
+                    SameEraseHorixontal(_x, _y + k, CheckSameColorHorizontal(_x, _y + k), true);
+                }*/
+
                 if (_fieldPanels[_y + k, _x].isCahainTarget)
                 {
                     isIncreaseChainCount = true;    //連鎖数を加算
                 }
-                _fieldPanels[_y + k, _x].StartErase();
+                _fieldPanels[_y + k, _x].StartFlash();
             }
         }
     }
@@ -566,6 +578,11 @@ public class PaneponSystem : MonoBehaviour
                     Destroy(_fieldPanels[y, x]);
                     _fieldPanels[y, x] = null;
                 }
+                //@Array配列検証
+                if (_fieldPanels[y, x] && _fieldPanels[y, x].panel_State == PanelState.EraseWait)
+                {
+                    _fieldPanels[y, x].StartErase();
+                }
             }
         }
     }
@@ -578,10 +595,9 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if (_fieldPanels[y, x] && _fieldPanels[y, x].CheckToFall(true))
+                if (_fieldPanels[y, x])
                 {
-                    //CheckAllPanels();
-                    //return;
+                    _fieldPanels[y, x].CheckToFall(true);
                 }
             }
         }
