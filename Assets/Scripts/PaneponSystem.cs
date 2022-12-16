@@ -57,7 +57,6 @@ public class PaneponSystem : MonoBehaviour
         Stable,  //停止中
         Swap,    //入れ替え中
         Flash,   //発光中
-        EraseWait,  //消滅待ち
         Erase,   //消滅中
         Fall,    //落下中
 
@@ -86,11 +85,8 @@ public class PaneponSystem : MonoBehaviour
     //スクロールボタンが押されているか
     private bool _onScrollButton = false;
 
-    //スクロールの加速
+    //スクロールの加速倍率
     const float FAST_SCROLL = 1f;
-
-    //連鎖数
-    //private int _chainCount = 0;
 
     //連鎖カウントを加算していいか
     private bool isIncreaseChainCount = false;
@@ -215,7 +211,7 @@ public class PaneponSystem : MonoBehaviour
         if (_inputSystem.Player.ScrolUp.triggered && !_onScrollButton)
         {
             _scrollSpeedTmp = _scrollSpeed;
-            _scrollSpeed = FAST_SCROLL;
+            _scrollSpeed += FAST_SCROLL;
             _onScrollButton = true;
         }
         //スクロールupを離したら
@@ -372,7 +368,7 @@ public class PaneponSystem : MonoBehaviour
             for (int j = 0; j < FIELD_SIZE_X; j++)
             {
                 //パネルが消せる場合の処理(X方向)
-                SameEraseHorixontal(j, i, CheckSameColorHorizontal(j, i), isCrossCheck);
+                SameEraseHorixontal(j, i, CheckSameColorHorizontal(j, i).n, CheckSameColorHorizontal(j, i).n_left, isCrossCheck);
 
                 //パネルが消せる場合の処理(Y方向)
                 SameEraseVartical(j, i, CheckSameColorVartical(j, i), isCrossCheck);
@@ -395,24 +391,35 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="_x"></param>
     /// <param name="_y"></param>
     /// <returns>そろっている数</returns>
-    private int CheckSameColorHorizontal(int _x, int _y)
+    private (int n, int n_left)CheckSameColorHorizontal(int _x, int _y)
     {
         PanelColor baseColor = GetColor(_x, _y);
         PanelState baseState = GetState(_x, _y);
         if (baseColor == PanelColor.Max || baseState != PanelState.Stable)
         {
-            return 0;
+            return (0,0);
         }
-        int n = 0;
+        //右方向に何個そろっている数
+        int n_right = 0;
         for (int x = _x; x < FIELD_SIZE_X; x++)
         {
             if (baseColor != GetColor(x, _y)|| baseState != GetState(x, _y))
             {
                 break;
             }
-            n++;
+            n_right++;
         }
-        return n;
+        //左方向にそろっている数
+        int n_left = 0;
+        for (int x = _x - 1; x >= 0; x--)
+        {
+            if (baseColor != GetColor(x, _y)|| baseState != GetState(x, _y))
+            {
+                break;
+            }
+            n_left++;
+        }
+        return (n_right + n_left, n_left);
     }
     /// <summary>
     /// 上方向に何個そろっているか
@@ -432,7 +439,7 @@ public class PaneponSystem : MonoBehaviour
         for (int y = _y; y < FIELD_SIZE_Y; y++)
         {
             if (baseColor != GetColor(_x, y) || baseState != GetState(_x, y))
-            {
+            { 
                 break;
             }
             n++;
@@ -445,23 +452,22 @@ public class PaneponSystem : MonoBehaviour
     /// <param name="y"></param>
     /// <param name="x"></param>
     /// <param name="n">そろっている数</param>
-    private void SameEraseHorixontal(int _x, int _y, int n, bool isCross)
+    private void SameEraseHorixontal(int _x, int _y, int n, int n_left, bool isCross)
     {
         if (n >= MIN_ERASE_COUNT)
         {
             for (int k = 0; k < n; k++)
             {
-                /*@クラッシュすることがある
                 if (!isCross)
                 {
                     SameEraseVartical(_x + k, _y, CheckSameColorVartical(_x + k, _y), true);
                 }
-                */
-                if (_fieldPanels[_y, _x + k].isCahainTarget)
+                
+                if (_fieldPanels[_y, _x + k - n_left].isCahainTarget)
                 {
                     isIncreaseChainCount = true;    //連鎖数を加算
                 }
-                _fieldPanels[_y, _x + k].StartFlash();
+                _fieldPanels[_y, _x + k - n_left].StartFlash();
             }
         }
     }
@@ -477,11 +483,11 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int k = 0; k < n; k++)
             {
-                /*
+                
                 if (!isCross)
                 {
-                    SameEraseHorixontal(_x, _y + k, CheckSameColorHorizontal(_x, _y + k), true);
-                }*/
+                    SameEraseHorixontal(_x, _y + k, CheckSameColorHorizontal(_x, _y + k).n, CheckSameColorHorizontal(_x, _y + k).n_left, true);
+                }
 
                 if (_fieldPanels[_y + k, _x].isCahainTarget)
                 {
@@ -552,7 +558,7 @@ public class PaneponSystem : MonoBehaviour
     /// </summary>
     private void ScrollUp()
     {
-        for (int y = FIELD_SIZE_Y - 2; y >= 0; y--)
+        for (int y = FIELD_SIZE_Y_BASE; y >= 0; y--)
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
@@ -578,11 +584,6 @@ public class PaneponSystem : MonoBehaviour
                     Destroy(_fieldPanels[y, x]);
                     _fieldPanels[y, x] = null;
                 }
-                //@Array配列検証
-                if (_fieldPanels[y, x] && _fieldPanels[y, x].panel_State == PanelState.EraseWait)
-                {
-                    _fieldPanels[y, x].StartErase();
-                }
             }
         }
     }
@@ -604,7 +605,6 @@ public class PaneponSystem : MonoBehaviour
     }
     /// <summary>
     /// いずれかのパネルが消えている最中か
-    /// @if文を減らすために処理がややこしくなってる
     /// </summary>
     /// <returns></returns>
     public bool IsSomePanelErasing()
@@ -613,42 +613,18 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                /*if (IsSomePanelErasingIF(y, x))
+                if (_fieldPanels[y, x] && (_fieldPanels[y, x].panel_State == PanelState.Flash || 
+                                           _fieldPanels[y, x].panel_State == PanelState.Erase ||
+                                           _fieldPanels[y, x].panel_State == PanelState.Fall ))
                 {
-                    return IsSomePanelErasingIF(y, x);
-                }*/
-                if (_fieldPanels[y, x])
-                {
-                    PanelState state = _fieldPanels[y, x].panel_State;
-                    if (state == PanelState.Flash || state == PanelState.Erase)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
         return false;
     }
     /// <summary>
-    /// IsSomePanelErasingの内部処理if文
-    /// @if文を減らすために処理がややこしくなってる
-    /// </summary>
-    /// <returns></returns>
-    private bool IsSomePanelErasingIF(int _y, int _x)
-    {
-        if (_fieldPanels[_y, _x])
-        {
-            PanelState state = _fieldPanels[_y, _x].panel_State;
-            if (state == PanelState.Flash || state == PanelState.Erase)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-    /// <summary>
     /// ゲームオーバー判定
-    /// @if文
     /// </summary>
     /// <returns></returns>
     public bool IsGameOverCondition()
@@ -657,13 +633,9 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if (_fieldPanels[y, x])
+                if (_fieldPanels[y, x] && _fieldPanels[y, x].panel_State == PanelState.Stable)
                 {
-                    PanelState state = _fieldPanels[y, x].panel_State;
-                    if (state == PanelState.Stable)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
@@ -706,13 +678,9 @@ public class PaneponSystem : MonoBehaviour
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if (_fieldPanels[y, x])
+                if (_fieldPanels[y, x] && _fieldPanels[y, x].panel_State == PanelState.Stable)
                 {
-                    PanelState state = _fieldPanels[y, x].panel_State;
-                    if (state == PanelState.Stable)
-                    {
-                        _fieldPanels[y, x].isCahainTarget = false;
-                    }
+                    _fieldPanels[y, x].isCahainTarget = false;
                 }
             }
         }

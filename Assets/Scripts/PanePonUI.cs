@@ -29,7 +29,7 @@ public class PanePonUI : MonoBehaviour
 
     private void Update()
     {
-        _chainCountText.gameObject.SetActive(_isSomePanelErasing);
+        //_chainCountText.gameObject.SetActive(_isSomePanelErasing);
         _chainCountText.text = "" + _chainCount;
     }
 }

@@ -25,8 +25,7 @@ public class PaneponPanel : MonoBehaviour
 
     //パネルの状態が入れ替え可能かどうか
     public bool _isSwapSble { get { return (_panel_State == PaneponSystem.PanelState.None || 
-                                            _panel_State == PaneponSystem.PanelState.Stable || 
-                                            _panel_State == PaneponSystem.PanelState.Fall); } }
+                                            _panel_State == PaneponSystem.PanelState.Stable); } }
 
     //パネルの色
     private PaneponSystem.PanelColor _color = PaneponSystem.PanelColor.Max;
@@ -48,7 +47,7 @@ public class PaneponPanel : MonoBehaviour
     private float _moveRatio = 0f;
 
     //パネルの落下速度
-    private float _fallSpeed = 0f;
+    private float _fallSpeed = 10f;
 
     //ステート経過時間
     private float _stateTimer = 0f;
@@ -62,8 +61,20 @@ public class PaneponPanel : MonoBehaviour
     //発光時間(1秒)
     const float FLASH_TIME = 1f;
 
+    //エフェクトが飛び散るスピード
+    const float EFFECT_SPEED = 1.1f;
+
     //消滅時間(0.1秒)
     const float ERASE_TIME = 0.1f;
+
+    //割合の定数
+    const float RATIO_ONE = 1f;
+
+    //移動の定数
+    const int MOVE_ONE = 1;
+
+    //点滅演出の定数
+    const int FLASH_TWO = 2;
 
     //システムへの参照
     private PaneponSystem _system = null;
@@ -88,7 +99,7 @@ public class PaneponPanel : MonoBehaviour
                 _moveRatio += Time.deltaTime / SWAP_TIME;
 
                 //割合が1以上になったら終了
-                if (_moveRatio >= 1.0f)
+                if (_moveRatio >= RATIO_ONE)
                 {
                     //位置を直接設定
                     SetPosition(_moveDestX, _moveDestY);
@@ -98,18 +109,18 @@ public class PaneponPanel : MonoBehaviour
                 else
                 {
                     //移動処理
-                    transform.localPosition = new Vector3(_posX, _posY, 0f) * (1f - _moveRatio) + new Vector3(_moveDestX, _moveDestY, 0f) * _moveRatio;
+                    transform.localPosition = new Vector3(_posX, _posY, 0f) * (MOVE_ONE - _moveRatio) + new Vector3(_moveDestX, _moveDestY, 0f) * _moveRatio;
                 }
                 break;
             case PaneponSystem.PanelState.Flash:
                 //時間経過でエフェクトを点滅させる
-                SetEffectVisible((_effectFlashCounter++ / 2) % 2 == 0);
+                SetEffectVisible(_effectFlashCounter++ % FLASH_TWO == 0);
                 //時間経過でEraseに移行
                 _stateTimer += Time.deltaTime;
                 if (_stateTimer >= FLASH_TIME)
                 {
                     //ステート遷移 
-                    _panel_State = PaneponSystem.PanelState.EraseWait;
+                    _panel_State = PaneponSystem.PanelState.Erase;
                     _stateTimer = 0f;
                 }
                 break;
@@ -138,27 +149,27 @@ public class PaneponPanel : MonoBehaviour
                 }
                 break;
             case PaneponSystem.PanelState.Fall:
-                _fallSpeed = Mathf.Clamp(_fallSpeed + 0.5f, 0f, MAX_FALL_SPEED);
+                //_fallSpeed = Mathf.Clamp(_fallSpeed + 0.5f, 0f, MAX_FALL_SPEED);速度がずれる
                 _moveRatio += _fallSpeed * Time.deltaTime;
 
                 //割合が1以上になったら下のマスに移動
-                if (_moveRatio >= 1.0f)
+                if (_moveRatio >= RATIO_ONE)
                 {
                     //位置を直接設定
                     float moveRatioTmp = _moveRatio;
                     SetPosition(_moveDestX, _moveDestY);
                     if (_panel_State == PaneponSystem.PanelState.Fall)
                     {
-                        _moveRatio = moveRatioTmp - 1f;
+                        _moveRatio = moveRatioTmp - RATIO_ONE;
                         //移動処理
-                        transform.localPosition = new Vector3(_posX, _posY, 0f) * (1f - _moveRatio) +
+                        transform.localPosition = new Vector3(_posX, _posY, 0f) * (RATIO_ONE - _moveRatio) +
                             new Vector3(_moveDestX, _moveDestY, 0f) * _moveRatio;
                     }
                 }
                 else
                 {
                     //移動処理
-                    transform.localPosition = new Vector3(_posX, _posY, 0f) * (1f - _moveRatio) +
+                    transform.localPosition = new Vector3(_posX, _posY, 0f) * (RATIO_ONE - _moveRatio) +
                         new Vector3(_moveDestX, _moveDestY, 0f) * _moveRatio;
                 }
                 break;
@@ -195,7 +206,6 @@ public class PaneponPanel : MonoBehaviour
     }
     /// <summary>
     /// 落下判定
-    /// @パネルによって落下速度が違うことがある
     /// </summary>
     public void CheckToFall(bool isOnlyCheckStable)
     {
@@ -205,7 +215,7 @@ public class PaneponPanel : MonoBehaviour
             return;
         }
         //移動先の床が無い かつ 移動先より下に隙間があったら落ちる処理に
-        PaneponSystem.PanelState panelState = _system.GetPanelState(_posX, _posY - 1);
+        PaneponSystem.PanelState panelState = _system.GetPanelState(_posX, _posY - MOVE_ONE);
         if (panelState == PaneponSystem.PanelState.None)// || panelState == PaneponSystem.PanelState.Fall
         {
             //落下処理
@@ -270,20 +280,6 @@ public class PaneponPanel : MonoBehaviour
         _panel_State = PaneponSystem.PanelState.Flash;
     }
     /// <summary>
-    /// ブロックを消す処理を開始する
-    /// </summary>
-    public void StartErase()
-    {
-        //Stableでない場合は行わない
-        if(_panel_State != PaneponSystem.PanelState.EraseWait)
-        {
-            return;
-        }
-        //ステート遷移
-        _panel_State = PaneponSystem.PanelState.Erase;
-    }
-    
-    /// <summary>
     /// エフェクトの可視性を設定
     /// </summary>
     /// <param name="flag"></param>
@@ -302,7 +298,7 @@ public class PaneponPanel : MonoBehaviour
     {
         for (int i = 0; i < _effectObjectList.Count; i++)
         {
-            _effectObjectList[i].transform.localPosition *= 1.1f;   //@仮
+            _effectObjectList[i].transform.localPosition *= EFFECT_SPEED;
         }
     }
     /// <summary>
