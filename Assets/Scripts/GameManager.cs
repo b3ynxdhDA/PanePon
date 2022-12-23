@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class GameManager : MonoBehaviour
 {
+    #region 変数
     //インプットシステム
     InputSystem _inputSystem;
 
@@ -27,6 +28,7 @@ public class GameManager : MonoBehaviour
         Pause
     };
 
+    #endregion
     private void Awake()
     {
         _inputSystem = new InputSystem();

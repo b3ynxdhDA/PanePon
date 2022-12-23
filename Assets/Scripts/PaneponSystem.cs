@@ -22,6 +22,9 @@ public class PaneponSystem : MonoBehaviour
     const int FIELD_SIZE_Y_BASE = 12;
     const int FIELD_SIZE_Y = 15;
 
+    //ゲーム開始前カウントダウン
+    private int _readyCount = 3;
+
     //パネルのプレハブのもと
     [SerializeField] private PaneponPanel _panelPurefab = null;
 
@@ -115,7 +118,7 @@ public class PaneponSystem : MonoBehaviour
 
     void Start()
     {
-        //ゲームのStateをGameRedyに設定
+        //ゲームのStateをGameRedyに設定@
         gameManager.game_State = GameManager.GameState.GameNow;
 
         //プレハブとマテリアルを用意する
@@ -235,6 +238,7 @@ public class PaneponSystem : MonoBehaviour
 
     private void FixedUpdate()
     {
+
         //PaneponPanelのUpdateを下から行う
         for (int y = 0; y < FIELD_SIZE_Y; y++)
         {
@@ -244,6 +248,9 @@ public class PaneponSystem : MonoBehaviour
                 if (panel)
                 {
                     panel.UpdateManual();
+
+                    //Noneのパネルを消す
+                    DeletEmptyPanel(panel);
                 }
             }
         }
@@ -265,8 +272,6 @@ public class PaneponSystem : MonoBehaviour
         //パネルがそろっているかどうかの判定
         CheckErase();
 
-        //Noneのパネルを消す
-        DeletEmptyPanel();
 
         //パネルの連鎖対象フラグをOFF
         ResetAllStablePanelChainTargetFlag();
@@ -573,18 +578,12 @@ public class PaneponSystem : MonoBehaviour
     /// <summary>
     /// Noneのパネルを消す
     /// </summary>
-    private void DeletEmptyPanel()
+    private void DeletEmptyPanel(PaneponPanel _panel)
     {
-        for (int y = 0; y < FIELD_SIZE_Y; y++)
+        if (_panel.panel_State == PanelState.None)
         {
-            for (int x = 0; x < FIELD_SIZE_X; x++)
-            {
-                if (_fieldPanels[y, x] && _fieldPanels[y, x].panel_State == PanelState.None)
-                {
-                    Destroy(_fieldPanels[y, x]);
-                    _fieldPanels[y, x] = null;
-                }
-            }
+            Destroy(_panel);
+            _panel = null;
         }
     }
     /// <summary>jj

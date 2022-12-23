@@ -1235,7 +1235,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1827283022
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1252,8 +1252,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 295.01, y: 0.0021973}
-  m_SizeDelta: {x: 690.0217, y: 959.22437}
+  m_AnchoredPosition: {x: 294.98, y: 0.0021973}
+  m_SizeDelta: {x: 689.9674, y: 959.22437}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1827283023
 MonoBehaviour:
@@ -1275,8 +1275,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -743063950725374613, guid: 808bc6d6eab83da4082c5d87f87dff47, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1315,7 +1315,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1964347936
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1332,8 +1332,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -285.6, y: 0.0020714}
-  m_SizeDelta: {x: 708.8919, y: 959.22485}
+  m_AnchoredPosition: {x: -281, y: 0.0020714}
+  m_SizeDelta: {x: 718.07623, y: 959.22485}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1964347937
 MonoBehaviour:
@@ -1355,8 +1355,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -839090477527620435, guid: 808bc6d6eab83da4082c5d87f87dff47, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1489,9 +1489,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2f67da212e291e41b65ccd1d8047ae7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _startCount: 0
   _chainCount: 0
   _isSomePanelErasing: 0
+  _startCountText: {fileID: 0}
   _gameOverText: {fileID: 1379566388}
   _chainCountText: {fileID: 503667701}
 --- !u!1001 &3112992631294960666
