@@ -33,22 +33,14 @@ public class PanePonUI : MonoBehaviour
     {
         gameManager = GameObject.FindWithTag("GameController").GetComponent<GameManager>();
     }
-    private void Update()
+    private void FixedUpdate()
     {
-        switch (gameManager.game_State)
-        {
-            case GameManager.GameState.GameRedy:
-                StartCoroutine(CountdownCoroutine());
-                break;
-            case GameManager.GameState.GameNow:
-                _chainCountText.gameObject.SetActive(_isSomePanelErasing);
-                _chainCountText.text = "" + _chainCount;
-                break;
-            case GameManager.GameState.GameOver:
-
-                break;
-        }
-
+        //_chainCountText.gameObject.SetActive(_isSomePanelErasing);
+        _chainCountText.text = "" + _chainCount;
+    }
+    public void StartCountCoroutine()
+    {
+        StartCoroutine(CountdownCoroutine());
     }
     IEnumerator CountdownCoroutine()
     {

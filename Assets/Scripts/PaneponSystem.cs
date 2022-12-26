@@ -119,7 +119,7 @@ public class PaneponSystem : MonoBehaviour
     void Start()
     {
         //ゲームのStateをGameRedyに設定@
-        gameManager.game_State = GameManager.GameState.GameNow;
+        gameManager.game_State = GameManager.GameState.GameRedy;
 
         //プレハブとマテリアルを用意する
         for (int i = 0; i < _panelTextureList.Count; i++)
@@ -157,6 +157,8 @@ public class PaneponSystem : MonoBehaviour
         //カーソルの初期位置を設定
         _corsorPosX = 2;
         _corsorPosY = 4;
+
+        _panePonUI.StartCountCoroutine();
     }
 
     void Update()
@@ -191,43 +193,44 @@ public class PaneponSystem : MonoBehaviour
         _corsorPosY = Mathf.Clamp(_corsorPosY + deltaY, _BOTTOM_ROW, FIELD_SIZE_Y_BASE);
         MoveCursor(_corsorPosX, _corsorPosY);
 
-        //パネル入れ替え処理
-        if (_inputSystem.Player.Swap.triggered && IsSwapable()
-            && gameManager.game_State != GameManager.GameState.GameRedy)
+        //ゲーム状態がRedyならカーソル移動以外の操作を行わない
+        if (gameManager.game_State != GameManager.GameState.GameRedy)
         {
-            if (_fieldPanels[_corsorPosY, _corsorPosX])
+            //パネル入れ替え処理
+            if (_inputSystem.Player.Swap.triggered && IsSwapable())
             {
-                _fieldPanels[_corsorPosY, _corsorPosX].Swap(_corsorPosX + 1, _corsorPosY);
-            }
-            if (_fieldPanels[_corsorPosY, _corsorPosX + 1])
-            {
-                _fieldPanels[_corsorPosY, _corsorPosX + 1].Swap(_corsorPosX, _corsorPosY);
+                if (_fieldPanels[_corsorPosY, _corsorPosX])
+                {
+                    _fieldPanels[_corsorPosY, _corsorPosX].Swap(_corsorPosX + 1, _corsorPosY);
+                }
+                if (_fieldPanels[_corsorPosY, _corsorPosX + 1])
+                {
+                    _fieldPanels[_corsorPosY, _corsorPosX + 1].Swap(_corsorPosX, _corsorPosY);
+                }
+
+                //入れ替え
+                PaneponPanel tmp = _fieldPanels[_corsorPosY, _corsorPosX];
+                _fieldPanels[_corsorPosY, _corsorPosX] = _fieldPanels[_corsorPosY, _corsorPosX + 1];
+                _fieldPanels[_corsorPosY, _corsorPosX + 1] = tmp;
             }
 
-            //入れ替え
-            PaneponPanel tmp = _fieldPanels[_corsorPosY, _corsorPosX];
-            _fieldPanels[_corsorPosY, _corsorPosX] = _fieldPanels[_corsorPosY, _corsorPosX + 1];
-            _fieldPanels[_corsorPosY, _corsorPosX + 1] = tmp;
-        }
-
-        //スクロールupが押されたら
-        if (_inputSystem.Player.ScrolUp.triggered && !_onScrollButton)
-        {
-            _scrollSpeedTmp = _scrollSpeed;
-            _scrollSpeed += FAST_SCROLL;
-            _onScrollButton = true;
-        }
-        //スクロールupを離したら
-        else if (_inputSystem.Player.ScrolUp.triggered && _onScrollButton)
-        {
-            _scrollSpeed = _scrollSpeedTmp;
-            _onScrollButton = false;
+            //スクロールupが押されたら
+            if (_inputSystem.Player.ScrolUp.triggered && !_onScrollButton)
+            {
+                _scrollSpeedTmp = _scrollSpeed;
+                _scrollSpeed += FAST_SCROLL;
+                _onScrollButton = true;
+            }
+            //スクロールupを離したら
+            else if (_inputSystem.Player.ScrolUp.triggered && _onScrollButton)
+            {
+                _scrollSpeed = _scrollSpeedTmp;
+                _onScrollButton = false;
+            }
         }
 
         //パネルについている連鎖フラグを切る
         ResetAllStablePanelChainTargetFlag();
-
-        //消滅したパネルを消す処理
 
         if (_inputSystem.Player.Test.triggered)
         {
@@ -238,7 +241,6 @@ public class PaneponSystem : MonoBehaviour
 
     private void FixedUpdate()
     {
-
         //PaneponPanelのUpdateを下から行う
         for (int y = 0; y < FIELD_SIZE_Y; y++)
         {
@@ -249,7 +251,7 @@ public class PaneponSystem : MonoBehaviour
                 {
                     panel.UpdateManual();
 
-                    //Noneのパネルを消す
+                    //消滅してNoneになったパネルを消す
                     DeletEmptyPanel(panel);
                 }
             }
@@ -257,6 +259,12 @@ public class PaneponSystem : MonoBehaviour
 
         //全てのパネルをチェック
         CheckAllPanels();
+
+        //ゲーム開始カウントダウン
+        if(gameManager.game_State == GameManager.GameState.GameRedy)
+        {
+            return;
+        }
 
         //ゲームオーバー処理
         if (IsGameOverCondition())
@@ -271,7 +279,6 @@ public class PaneponSystem : MonoBehaviour
 
         //パネルがそろっているかどうかの判定
         CheckErase();
-
 
         //パネルの連鎖対象フラグをOFF
         ResetAllStablePanelChainTargetFlag();

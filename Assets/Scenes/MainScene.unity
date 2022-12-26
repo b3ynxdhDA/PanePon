@@ -214,6 +214,14 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3390160596612215760, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 64.00003
+      objectReference: {fileID: 0}
+    - target: {fileID: 3390160596612215760, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 5049273246719926611, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
       propertyPath: m_Name
       value: CloseButton
@@ -222,6 +230,18 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5795919581607130632, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 364
+      objectReference: {fileID: 0}
+    - target: {fileID: 5795919581607130632, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6114130375303931212, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
+      propertyPath: m_Text
+      value: Close
+      objectReference: {fileID: 0}
     - target: {fileID: 6147138608243307695, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
       propertyPath: m_Name
       value: PauseUI
@@ -229,6 +249,14 @@ PrefabInstance:
     - target: {fileID: 6147138608243307695, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8732541630337233655, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 214
+      objectReference: {fileID: 0}
+    - target: {fileID: 8732541630337233655, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8892174611461008244, guid: 0bf6874833e65cf44ad37ae9b521b2a7, type: 3}
       propertyPath: m_ReferenceResolution.x
@@ -594,7 +622,7 @@ SpriteRenderer:
   m_Size: {x: 6.72, y: 5.83}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &810590634
@@ -1491,7 +1519,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _chainCount: 0
   _isSomePanelErasing: 0
-  _startCountText: {fileID: 0}
+  _startCountText: {fileID: 1500112844}
   _gameOverText: {fileID: 1379566388}
   _chainCountText: {fileID: 503667701}
 --- !u!1001 &3112992631294960666
