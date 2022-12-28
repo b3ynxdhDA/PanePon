@@ -267,7 +267,7 @@ public class PaneponPanel : MonoBehaviour
         _panel_State = PaneponSystem.PanelState.Fall;
     }
     /// <summary>
-    /// ブロックの点滅演出を開始する
+    /// パネルの点滅演出を開始する
     /// </summary>
     public void StartFlash()
     {

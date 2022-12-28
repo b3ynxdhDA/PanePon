@@ -9,8 +9,6 @@ using UnityEngine.UI;
 /// </summary>
 public class PanePonUI : MonoBehaviour
 {
-    private GameManager gameManager = null;
-
     private PanePonUI instance = null;
     public PanePonUI Instance { get { return instance; } set { instance = value; } }
 
@@ -24,20 +22,31 @@ public class PanePonUI : MonoBehaviour
     [SerializeField] private Text _startCountText = default;
 
     //ゲームオーバーテキスト
-    [SerializeField] private Text _gameOverText = null;
+    [SerializeField] private GameObject _resultText = default;
 
     //連鎖カウントテキスト
     [SerializeField] private Text _chainCountText = default;
 
+    //ハイスコアテキスト
+    [SerializeField] private Text _highScoreText = default;
+
     private void Awake()
     {
-        gameManager = GameObject.FindWithTag("GameController").GetComponent<GameManager>();
+        //リザルトを非表示に
+        _resultText.gameObject.SetActive(false);
     }
-    private void FixedUpdate()
+    private void Update()
     {
+        //連鎖中しか表示しない
         //_chainCountText.gameObject.SetActive(_isSomePanelErasing);
         _chainCountText.text = "" + _chainCount;
+
+        //ハイスコアの更新
+        _highScoreText.text = "" + GameManager.instance._highScore;
     }
+    /// <summary>
+    /// カウントダウンコルーチンを開始
+    /// </summary>
     public void StartCountCoroutine()
     {
         StartCoroutine(CountdownCoroutine());
@@ -62,6 +71,13 @@ public class PanePonUI : MonoBehaviour
         _startCountText.text = "";
         _startCountText.gameObject.SetActive(false);
         //_imageMask.gameObject.SetActive(false);
-        gameManager.game_State = GameManager.GameState.GameNow;
+        GameManager.instance.game_State = GameManager.GameState.GameNow;
+    }
+    /// <summary>
+    /// リザルトを表示
+    /// </summary>
+    public void ResultUI()
+    {
+        _resultText.gameObject.SetActive(true);
     }
 }

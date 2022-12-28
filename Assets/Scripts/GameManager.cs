@@ -11,12 +11,13 @@ public class GameManager : MonoBehaviour
     //インプットシステム
     InputSystem _inputSystem;
 
-    private GameManager _instance = null;
-    public GameManager instance { get { return _instance; } set { _instance = value; } }
+    //private GameManager _instance = null;
+    //public GameManager instance { get { return _instance; } set { _instance = value; } }
+    public static GameManager instance = null;
 
     //ゲームの状態
-    private GameManager.GameState _game_State = GameManager.GameState.Title;
-    public GameManager.GameState game_State { get { return _game_State; } set { _game_State = value; } }
+    private GameState _game_State = GameState.Title;
+    public GameState game_State { get { return _game_State; } set { _game_State = value; } }
     public enum GameState
     {
         Title,
@@ -28,6 +29,9 @@ public class GameManager : MonoBehaviour
         Pause
     };
 
+    //ハイスコアの変数
+    public int _highScore = 0;
+
     #endregion
     private void Awake()
     {
@@ -36,7 +40,7 @@ public class GameManager : MonoBehaviour
 
         if (instance == null)
         {
-            _instance = this;
+            instance = this;
             DontDestroyOnLoad(this.gameObject);
         }
         else

@@ -15,15 +15,12 @@ public class PaneponSystem : MonoBehaviour
     //PanePonUI   @スクリプトがMonoBehaviourを継承しているとnewが使えない
     [SerializeField] private PanePonUI _panePonUI = null;
 
-    //GameManager
-    GameManager gameManager = null;
+    //GameManager@staticを使うと必要ない
+    //GameManager gameManager = null;
 
     const int FIELD_SIZE_X = 6;
     const int FIELD_SIZE_Y_BASE = 12;
     const int FIELD_SIZE_Y = 15;
-
-    //ゲーム開始前カウントダウン
-    private int _readyCount = 3;
 
     //パネルのプレハブのもと
     [SerializeField] private PaneponPanel _panelPurefab = null;
@@ -111,7 +108,7 @@ public class PaneponSystem : MonoBehaviour
     #endregion
     private void Awake()
     {
-        gameManager = GameObject.FindWithTag("GameController").GetComponent<GameManager>();
+        //gameManager = GameObject.FindWithTag("GameController").GetComponent<GameManager>();
         _inputSystem = new InputSystem();
         _inputSystem.Enable();
     }
@@ -119,7 +116,10 @@ public class PaneponSystem : MonoBehaviour
     void Start()
     {
         //ゲームのStateをGameRedyに設定@
-        gameManager.game_State = GameManager.GameState.GameRedy;
+        GameManager.instance.game_State = GameManager.GameState.GameRedy;
+
+        //ゲームのハイスコアを初期化
+        GameManager.instance._highScore = 0;
 
         //プレハブとマテリアルを用意する
         for (int i = 0; i < _panelTextureList.Count; i++)
@@ -163,8 +163,8 @@ public class PaneponSystem : MonoBehaviour
 
     void Update()
     {
-        if(gameManager.game_State == GameManager.GameState.Pause
-           || gameManager.game_State == GameManager.GameState.GameOver)
+        if(GameManager.instance.game_State == GameManager.GameState.Pause
+           || GameManager.instance.game_State == GameManager.GameState.GameOver)
         {
             return;
         }
@@ -194,7 +194,7 @@ public class PaneponSystem : MonoBehaviour
         MoveCursor(_corsorPosX, _corsorPosY);
 
         //ゲーム状態がRedyならカーソル移動以外の操作を行わない
-        if (gameManager.game_State != GameManager.GameState.GameRedy)
+        if (GameManager.instance.game_State != GameManager.GameState.GameRedy)
         {
             //パネル入れ替え処理
             if (_inputSystem.Player.Swap.triggered && IsSwapable())
@@ -261,7 +261,7 @@ public class PaneponSystem : MonoBehaviour
         CheckAllPanels();
 
         //ゲーム開始カウントダウン
-        if(gameManager.game_State == GameManager.GameState.GameRedy)
+        if(GameManager.instance.game_State == GameManager.GameState.GameRedy)
         {
             return;
         }
@@ -269,10 +269,14 @@ public class PaneponSystem : MonoBehaviour
         //ゲームオーバー処理
         if (IsGameOverCondition())
         {
-            if(gameManager.game_State != GameManager.GameState.GameOver)
+            if(GameManager.instance.game_State != GameManager.GameState.GameOver)
             {
                 print("ガメオベラ");
-                gameManager.game_State = GameManager.GameState.GameOver;
+                //ゲームの状態をGameOverに設定
+                GameManager.instance.game_State = GameManager.GameState.GameOver;
+
+                //リザルトを表示
+                _panePonUI.ResultUI();
             }
             return;
         }
@@ -284,7 +288,7 @@ public class PaneponSystem : MonoBehaviour
         ResetAllStablePanelChainTargetFlag();
 
         //スクロール処理
-        if (!IsSomePanelErasing())
+        if (!IsSomePanelErasing(true))
         {
             _scrollRaio += _scrollSpeed * Time.deltaTime;
         }
@@ -387,12 +391,12 @@ public class PaneponSystem : MonoBehaviour
             }
         }
 
-        _panePonUI._isSomePanelErasing = IsSomePanelErasing();
+        _panePonUI._isSomePanelErasing = IsSomePanelErasing(false);
         if (isIncreaseChainCount)
         {
             _panePonUI._chainCount++;  //連鎖数を実際に加算
         }
-        else if(!IsSomePanelErasing())
+        else if(!IsSomePanelErasing(false))
         { 
             _panePonUI._chainCount = 1;    //連鎖を1からやり直す
         }
@@ -480,6 +484,9 @@ public class PaneponSystem : MonoBehaviour
                     isIncreaseChainCount = true;    //連鎖数を加算
                 }
                 _fieldPanels[_y, _x + k - n_left].StartFlash();
+
+                //消したパネルの数をハイスコアに加算
+                GameManager.instance._highScore++;
             }
         }
     }
@@ -506,6 +513,9 @@ public class PaneponSystem : MonoBehaviour
                     isIncreaseChainCount = true;    //連鎖数を加算
                 }
                 _fieldPanels[_y + k, _x].StartFlash();
+
+                //消したパネルの数をハイスコアに加算
+                GameManager.instance._highScore++;
             }
         }
     }
@@ -613,15 +623,19 @@ public class PaneponSystem : MonoBehaviour
     /// いずれかのパネルが消えている最中か
     /// </summary>
     /// <returns></returns>
-    public bool IsSomePanelErasing()
+    private bool IsSomePanelErasing(bool isScrollCheck)
     {
         for (int y = 0; y < FIELD_SIZE_Y; y++)
         {
             for (int x = 0; x < FIELD_SIZE_X; x++)
             {
-                if (_fieldPanels[y, x] && (_fieldPanels[y, x].panel_State == PanelState.Flash || 
-                                           _fieldPanels[y, x].panel_State == PanelState.Erase ||
-                                           _fieldPanels[y, x].panel_State == PanelState.Fall ))
+                if (_fieldPanels[y, x] && 
+                    (_fieldPanels[y, x].panel_State == PanelState.Flash || 
+                     _fieldPanels[y, x].panel_State == PanelState.Erase))
+                {
+                    return true;
+                }
+                else if (_fieldPanels[y, x] && !isScrollCheck && (_fieldPanels[y, x].panel_State == PanelState.Fall ))
                 {
                     return true;
                 }

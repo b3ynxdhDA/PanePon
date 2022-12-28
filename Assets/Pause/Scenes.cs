@@ -10,21 +10,6 @@ public class Scenes : MonoBehaviour
 {
     //EventSystemのFirstSelectedに
     //呼び出した時に選択状態にするボタンオブジェクトをアタッチして
-    public void OnClose()
-    {
-        //ポーズUIのアクティブを切り替え
-        gameObject.SetActive(!gameObject.activeSelf);
-
-        //ポーズUIが表示されている時は停止
-        if (gameObject.activeSelf)
-        {
-            Time.timeScale = 0f;
-        }
-        else
-        {
-            Time.timeScale = 1f;
-        }
-    }   
     
     public void OnCheckPoint()
     {
