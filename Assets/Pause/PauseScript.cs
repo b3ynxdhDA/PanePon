@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 //ポーズ機能を呼び出すクラス
 //常にアクティブなオブジェクトにアタッチして
@@ -9,7 +10,10 @@ public class PauseScript : MonoBehaviour
     InputSystem _inputSystem;
 
     //ポーズしたときに表示するUIプレハブ
-    [SerializeField] private GameObject pauseUI = default;
+    [SerializeField] private GameObject _pauseUI = default;
+
+    //ポーズしたとき選択されているボタン
+    [SerializeField] private GameObject _selectedButton = default;
 
     private void Awake()
     {
@@ -37,20 +41,20 @@ public class PauseScript : MonoBehaviour
             return;
         }
         //ポーズUIのアクティブを切り替え
-        pauseUI.SetActive(!pauseUI.activeSelf);
+        _pauseUI.SetActive(!_pauseUI.activeSelf);
 
         //ポーズUIが表示されている時は停止
-        if (pauseUI.activeSelf)
+        if (_pauseUI.activeSelf)
         {
             Time.timeScale = 0f;
             GameManager.instance.game_State = GameManager.GameState.Pause;
-            print("Pause : STOP");
+            EventSystem.current.SetSelectedGameObject(_selectedButton);
         }
         else
         {
             Time.timeScale = 1f;
             GameManager.instance.game_State = GameManager.GameState.GameNow;
-            print("Pause : START");
+            EventSystem.current.SetSelectedGameObject(null);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// パネポンのゲーム本編で使用されるUI
@@ -21,8 +22,11 @@ public class PanePonUI : MonoBehaviour
     //ゲームスタートのカウント
     [SerializeField] private Text _startCountText = default;
 
-    //ゲームオーバーテキスト
+    //リザルトテキスト
     [SerializeField] private GameObject _resultText = default;
+
+    //リザルトテキストの初期選択ボタン
+    [SerializeField] private GameObject _resultSelectedButton = default;
 
     //連鎖カウントテキスト
     [SerializeField] private Text _chainCountText = default;
@@ -38,7 +42,7 @@ public class PanePonUI : MonoBehaviour
     private void Update()
     {
         //連鎖中しか表示しない
-        //_chainCountText.gameObject.SetActive(_isSomePanelErasing);
+        _chainCountText.gameObject.SetActive(_isSomePanelErasing);
         _chainCountText.text = "" + _chainCount;
 
         //ハイスコアの更新
@@ -79,5 +83,6 @@ public class PanePonUI : MonoBehaviour
     public void ResultUI()
     {
         _resultText.gameObject.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(_resultSelectedButton);
     }
 }

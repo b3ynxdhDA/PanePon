@@ -395,10 +395,12 @@ public class PaneponSystem : MonoBehaviour
         if (isIncreaseChainCount)
         {
             _panePonUI._chainCount++;  //連鎖数を実際に加算
+            print("+1");
         }
         else if(!IsSomePanelErasing(false))
         { 
             _panePonUI._chainCount = 1;    //連鎖を1からやり直す
+            print("rensa");
         }
     }
     /// <summary>
