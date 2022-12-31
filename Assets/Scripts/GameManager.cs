@@ -11,6 +11,9 @@ public class GameManager : MonoBehaviour
     //インプットシステム
     InputSystem _inputSystem;
 
+    //SEマネージャー
+    public SEManager _seManager = default;
+
     //private GameManager _instance = null;
     //public GameManager instance { get { return _instance; } set { _instance = value; } }
     public static GameManager instance = null;
@@ -37,6 +40,9 @@ public class GameManager : MonoBehaviour
     {
         _inputSystem = new InputSystem();
         _inputSystem.Enable();
+
+        //SEマネージャーを外部から参照しやすく
+        _seManager = transform.GetComponent<SEManager>();
 
         if (instance == null)
         {

@@ -269,13 +269,17 @@ public class PaneponPanel : MonoBehaviour
     /// <summary>
     /// パネルの点滅演出を開始する
     /// </summary>
-    public void StartFlash()
+    public void StartFlash()//float flashTime
     {
         //Stableでない場合は行わない
         if(_panel_State != PaneponSystem.PanelState.Stable)
         {
             return;
         }
+
+        //パネルの消滅にディレイを入れる場合の処理
+        //FLASH_TIME = flashTime;
+
         //ステート遷移
         _panel_State = PaneponSystem.PanelState.Flash;
     }

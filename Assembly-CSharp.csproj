@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\PaneponPanel.cs" />
     <Compile Include="Assets\Pause\FadeController.cs" />
     <Compile Include="Assets\Pause\Scenes.cs" />
+    <Compile Include="Assets\SEManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

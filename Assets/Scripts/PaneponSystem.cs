@@ -175,18 +175,30 @@ public class PaneponSystem : MonoBehaviour
 
         if (_inputSystem.Player.Up.triggered)
         {
+            //カーソル移動SE
+            GameManager.instance._seManager.OnMoveCorsor_SE();
+
             deltaY++;
         }
         if (_inputSystem.Player.Down.triggered)
         {
+            //カーソル移動SE
+            GameManager.instance._seManager.OnMoveCorsor_SE();
+
             deltaY--;
         }
         if (_inputSystem.Player.Right.triggered)
         {
+            //カーソル移動SE
+            GameManager.instance._seManager.OnMoveCorsor_SE();
+
             deltaX++;
         }
         if (_inputSystem.Player.Left.triggered)
         {
+            //カーソル移動SE
+            GameManager.instance._seManager.OnMoveCorsor_SE();
+
             deltaX--;
         }
         _corsorPosX = Mathf.Clamp(_corsorPosX + deltaX, 0, 4);
@@ -212,6 +224,9 @@ public class PaneponSystem : MonoBehaviour
                 PaneponPanel tmp = _fieldPanels[_corsorPosY, _corsorPosX];
                 _fieldPanels[_corsorPosY, _corsorPosX] = _fieldPanels[_corsorPosY, _corsorPosX + 1];
                 _fieldPanels[_corsorPosY, _corsorPosX + 1] = tmp;
+
+                //入れ替えSE
+                GameManager.instance._seManager.OnSwap_SE();
             }
 
             //スクロールupが押されたら
@@ -395,12 +410,10 @@ public class PaneponSystem : MonoBehaviour
         if (isIncreaseChainCount)
         {
             _panePonUI._chainCount++;  //連鎖数を実際に加算
-            print("+1");
         }
         else if(!IsSomePanelErasing(false))
         { 
             _panePonUI._chainCount = 1;    //連鎖を1からやり直す
-            print("rensa");
         }
     }
     /// <summary>
@@ -490,6 +503,9 @@ public class PaneponSystem : MonoBehaviour
                 //消したパネルの数をハイスコアに加算
                 GameManager.instance._highScore++;
             }
+            
+            //カーソル移動SE
+            GameManager.instance._seManager.OnPanelErase_SE();
         }
     }
     /// <summary>
@@ -519,6 +535,9 @@ public class PaneponSystem : MonoBehaviour
                 //消したパネルの数をハイスコアに加算
                 GameManager.instance._highScore++;
             }
+
+            //カーソル移動SE
+            GameManager.instance._seManager.OnPanelErase_SE();
         }
     }
     /// <summary>

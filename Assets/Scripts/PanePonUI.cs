@@ -61,15 +61,19 @@ public class PanePonUI : MonoBehaviour
         _startCountText.gameObject.SetActive(true);
 
         _startCountText.text = "3";
+        GameManager.instance._seManager.OnStartCount3_SE();
         yield return new WaitForSeconds(1.0f);
 
         _startCountText.text = "2";
+        GameManager.instance._seManager.OnStartCount3_SE();
         yield return new WaitForSeconds(1.0f);
 
         _startCountText.text = "1";
+        GameManager.instance._seManager.OnStartCount3_SE();
         yield return new WaitForSeconds(1.0f);
 
         _startCountText.text = "GO!";
+        GameManager.instance._seManager.OnStartCountGo_SE();
         yield return new WaitForSeconds(1.0f);
 
         _startCountText.text = "";
