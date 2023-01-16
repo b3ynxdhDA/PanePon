@@ -42,7 +42,10 @@ public class PanePonUI : MonoBehaviour
     private void Update()
     {
         //連鎖中しか表示しない
-        _chainCountText.gameObject.SetActive(_isSomePanelErasing);
+        //_chainCountText.gameObject.SetActive(_isSomePanelErasing);
+
+        //@連載中のみ_chainCountを1にしたい
+
         _chainCountText.text = "" + _chainCount;
 
         //ハイスコアの更新

@@ -413,7 +413,7 @@ public class PaneponSystem : MonoBehaviour
         }
         else if(!IsSomePanelErasing(false))
         { 
-            _panePonUI._chainCount = 1;    //連鎖を1からやり直す
+            _panePonUI._chainCount = 0;    //連鎖を1からやり直す
         }
     }
     /// <summary>
