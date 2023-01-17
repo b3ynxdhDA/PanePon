@@ -15,8 +15,7 @@ public class GameManager : MonoBehaviour
     public SEManager _seManager = default;
 
     //private GameManager _instance = null;
-    //public GameManager instance { get { return _instance; } set { _instance = value; } }
-    public static GameManager instance = null;
+    public static GameManager instance { get; set; }
 
     //ゲームの状態
     private GameState _game_State = GameState.Title;

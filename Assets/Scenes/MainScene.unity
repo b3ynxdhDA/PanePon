@@ -1237,7 +1237,7 @@ MonoBehaviour:
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: a038d317-9a74-4e0e-a708-b2944c0060e6
-    m_ActionName: Player/ScrolUp[/XInputControllerWindows/rightShoulder,/XInputControllerWindows/leftShoulder]
+    m_ActionName: Player/ScrolUp[/Keyboard/shift]
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: 82a1ddcc-74c0-442e-a558-39d999741833

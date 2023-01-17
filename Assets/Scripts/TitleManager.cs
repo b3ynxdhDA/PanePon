@@ -16,6 +16,7 @@ public class TitleManager : MonoBehaviour
     private void OnDisable() => _pressAnyKeyAction.Disable();
     void Awake()
     {
+        Time.timeScale = 1f;
         gameManager = GameObject.FindWithTag("GameController").GetComponent<GameManager>();
         gameManager.game_State = GameManager.GameState.Title;
     }

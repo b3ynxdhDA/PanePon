@@ -15,9 +15,6 @@ public class PaneponSystem : MonoBehaviour
     //PanePonUI   @スクリプトがMonoBehaviourを継承しているとnewが使えない
     [SerializeField] private PanePonUI _panePonUI = null;
 
-    //GameManager@staticを使うと必要ない
-    //GameManager gameManager = null;
-
     const int FIELD_SIZE_X = 6;
     const int FIELD_SIZE_Y_BASE = 12;
     const int FIELD_SIZE_Y = 15;
@@ -108,7 +105,6 @@ public class PaneponSystem : MonoBehaviour
     #endregion
     private void Awake()
     {
-        //gameManager = GameObject.FindWithTag("GameController").GetComponent<GameManager>();
         _inputSystem = new InputSystem();
         _inputSystem.Enable();
     }
@@ -303,7 +299,7 @@ public class PaneponSystem : MonoBehaviour
         ResetAllStablePanelChainTargetFlag();
 
         //スクロール処理
-        if (!IsSomePanelErasing(true))
+        if (!IsSomePanelErasing(true))//
         {
             _scrollRaio += _scrollSpeed * Time.deltaTime;
         }
@@ -406,14 +402,14 @@ public class PaneponSystem : MonoBehaviour
             }
         }
 
-        _panePonUI._isSomePanelErasing = IsSomePanelErasing(false);
+        _panePonUI._isSomePanelErasing = IsSomePanelErasing(true);
         if (isIncreaseChainCount)
         {
             _panePonUI._chainCount++;  //連鎖数を実際に加算
         }
         else if(!IsSomePanelErasing(false))
         { 
-            _panePonUI._chainCount = 0;    //連鎖を1からやり直す
+            _panePonUI._chainCount = 1;    //連鎖を1からやり直す
         }
     }
     /// <summary>
@@ -643,6 +639,8 @@ public class PaneponSystem : MonoBehaviour
     /// <summary>
     /// いずれかのパネルが消えている最中か
     /// </summary>
+    /// 引数がtrue:消滅中のみ
+    /// 引数がfalse:消滅中と落下中
     /// <returns></returns>
     private bool IsSomePanelErasing(bool isScrollCheck)
     {
@@ -654,10 +652,12 @@ public class PaneponSystem : MonoBehaviour
                     (_fieldPanels[y, x].panel_State == PanelState.Flash || 
                      _fieldPanels[y, x].panel_State == PanelState.Erase))
                 {
+                    //パネルが消滅中
                     return true;
                 }
-                else if (_fieldPanels[y, x] && !isScrollCheck && (_fieldPanels[y, x].panel_State == PanelState.Fall ))
+                else if (_fieldPanels[y, x] && !isScrollCheck && _fieldPanels[y, x].panel_State == PanelState.Fall )
                 {
+                    //パネルが落下中
                     return true;
                 }
             }
