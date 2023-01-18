@@ -89,8 +89,10 @@ public class PaneponPanel : MonoBehaviour
         SetEffectVisible(false);
     }
 
-
-    public void  UpdateManual()
+    /// <summary>
+    /// PaneponSystamと同期したUpdateメソッド
+    /// </summary>
+    public void  ManualUpdate()
     {
         switch (_panel_State)
         {

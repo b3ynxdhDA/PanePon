@@ -245,6 +245,7 @@ public class PaneponSystem : MonoBehaviour
         //パネルについている連鎖フラグを切る
         ResetAllStablePanelChainTargetFlag();
 
+        //テストキーでフィールド情報を表示
         if (_inputSystem.Player.Test.triggered)
         {
             Test();
@@ -262,7 +263,8 @@ public class PaneponSystem : MonoBehaviour
                 PaneponPanel panel = _fieldPanels[y, x];
                 if (panel)
                 {
-                    panel.UpdateManual();
+                    //パネルのUpdataメソッドを実行
+                    panel.ManualUpdate();
 
                     //消滅してNoneになったパネルを消す
                     DeletEmptyPanel(panel);
@@ -284,7 +286,6 @@ public class PaneponSystem : MonoBehaviour
         {
             if(GameManager.instance.game_State != GameManager.GameState.GameOver)
             {
-                print("ガメオベラ");
                 //ゲームの状態をGameOverに設定
                 GameManager.instance.game_State = GameManager.GameState.GameOver;
 
@@ -330,8 +331,8 @@ public class PaneponSystem : MonoBehaviour
                 _fieldPanels[y, x] = newPanel;
             }
         }
+        //パネルの生成位置を設定
         _panelRoot.transform.localPosition = new Vector3(0f, _scrollRaio, 0f);
-
     }
 
     #region メソッド
@@ -611,7 +612,9 @@ public class PaneponSystem : MonoBehaviour
             }
         }
     }
-
+    /// <summary>
+    /// スクロールの加速をリセット
+    /// </summary>
     private void ResetScrollSpeed()
     {
         if (_onScrollButton)
