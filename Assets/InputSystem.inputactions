@@ -54,12 +54,20 @@
                     "interactions": "Press"
                 },
                 {
-                    "name": "ScrolUp",
+                    "name": "PressScrolUp",
                     "type": "Button",
                     "id": "a038d317-9a74-4e0e-a708-b2944c0060e6",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press(behavior=2)"
+                    "interactions": "Press"
+                },
+                {
+                    "name": "ReleaseScrolUp",
+                    "type": "Button",
+                    "id": "3ec65a2f-f10b-4a44-96a6-5007d009a980",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(behavior=1)"
                 },
                 {
                     "name": "Esc",
@@ -251,7 +259,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "ScrolUp",
+                    "action": "PressScrolUp",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -262,7 +270,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "ScrolUp",
+                    "action": "PressScrolUp",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -273,7 +281,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "ScrolUp",
+                    "action": "PressScrolUp",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -318,6 +326,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "094b5128-b57f-4592-89de-6aa5f72d15ab",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ReleaseScrolUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4b738c75-6035-4b82-9fe4-8d8ff812dd45",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ReleaseScrolUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7a3977ab-002e-4c04-a3ed-3b5ebebbdfd5",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ReleaseScrolUp",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -159,9 +159,10 @@ public class PaneponSystem : MonoBehaviour
 
     void Update()
     {
-        if(GameManager.instance.game_State == GameManager.GameState.Pause
+        if (GameManager.instance.game_State == GameManager.GameState.Pause
            || GameManager.instance.game_State == GameManager.GameState.GameOver)
         {
+            ResetScrollSpeed();
             return;
         }
 
@@ -225,19 +226,20 @@ public class PaneponSystem : MonoBehaviour
                 GameManager.instance._seManager.OnSwap_SE();
             }
 
-            //スクロールupが押されたら
-            if (_inputSystem.Player.ScrolUp.triggered && !_onScrollButton)
-            {
-                _scrollSpeedTmp = _scrollSpeed;
-                _scrollSpeed += FAST_SCROLL;
-                _onScrollButton = true;
-            }
-            //スクロールupを離したら
-            else if (_inputSystem.Player.ScrolUp.triggered && _onScrollButton)
-            {
-                _scrollSpeed = _scrollSpeedTmp;
-                _onScrollButton = false;
-            }
+        }
+
+        //スクロールupが押されたら
+        if (_inputSystem.Player.PressScrolUp.triggered && !_onScrollButton)
+        {
+            _scrollSpeedTmp = _scrollSpeed;
+            _scrollSpeed += FAST_SCROLL;
+            _onScrollButton = true;
+        }
+        //スクロールupを離したら
+        else if (_inputSystem.Player.ReleaseScrolUp.triggered && _onScrollButton)
+        {
+            _scrollSpeed = _scrollSpeedTmp;
+            _onScrollButton = false;
         }
 
         //パネルについている連鎖フラグを切る
@@ -607,6 +609,15 @@ public class PaneponSystem : MonoBehaviour
                     _fieldPanels[y + 1, x].CarryUp();
                 }
             }
+        }
+    }
+
+    private void ResetScrollSpeed()
+    {
+        if (_onScrollButton)
+        {
+            _scrollSpeed = _scrollSpeedTmp;
+            _onScrollButton = false;
         }
     }
     /// <summary>

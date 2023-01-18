@@ -67,12 +67,20 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""interactions"": ""Press""
                 },
                 {
-                    ""name"": ""ScrolUp"",
+                    ""name"": ""PressScrolUp"",
                     ""type"": ""Button"",
                     ""id"": ""a038d317-9a74-4e0e-a708-b2944c0060e6"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": ""Press(behavior=2)""
+                    ""interactions"": ""Press""
+                },
+                {
+                    ""name"": ""ReleaseScrolUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""3ec65a2f-f10b-4a44-96a6-5007d009a980"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": ""Press(behavior=1)""
                 },
                 {
                     ""name"": ""Esc"",
@@ -264,7 +272,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ScrolUp"",
+                    ""action"": ""PressScrolUp"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -275,7 +283,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ScrolUp"",
+                    ""action"": ""PressScrolUp"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -286,7 +294,7 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""ScrolUp"",
+                    ""action"": ""PressScrolUp"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -331,6 +339,39 @@ public class @InputSystem : IInputActionCollection, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""094b5128-b57f-4592-89de-6aa5f72d15ab"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ReleaseScrolUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4b738c75-6035-4b82-9fe4-8d8ff812dd45"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ReleaseScrolUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7a3977ab-002e-4c04-a3ed-3b5ebebbdfd5"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ReleaseScrolUp"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -386,7 +427,8 @@ public class @InputSystem : IInputActionCollection, IDisposable
         m_Player_Left = m_Player.FindAction("Left", throwIfNotFound: true);
         m_Player_Swap = m_Player.FindAction("Swap", throwIfNotFound: true);
         m_Player_Test = m_Player.FindAction("Test", throwIfNotFound: true);
-        m_Player_ScrolUp = m_Player.FindAction("ScrolUp", throwIfNotFound: true);
+        m_Player_PressScrolUp = m_Player.FindAction("PressScrolUp", throwIfNotFound: true);
+        m_Player_ReleaseScrolUp = m_Player.FindAction("ReleaseScrolUp", throwIfNotFound: true);
         m_Player_Esc = m_Player.FindAction("Esc", throwIfNotFound: true);
         m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
     }
@@ -444,7 +486,8 @@ public class @InputSystem : IInputActionCollection, IDisposable
     private readonly InputAction m_Player_Left;
     private readonly InputAction m_Player_Swap;
     private readonly InputAction m_Player_Test;
-    private readonly InputAction m_Player_ScrolUp;
+    private readonly InputAction m_Player_PressScrolUp;
+    private readonly InputAction m_Player_ReleaseScrolUp;
     private readonly InputAction m_Player_Esc;
     private readonly InputAction m_Player_Pause;
     public struct PlayerActions
@@ -457,7 +500,8 @@ public class @InputSystem : IInputActionCollection, IDisposable
         public InputAction @Left => m_Wrapper.m_Player_Left;
         public InputAction @Swap => m_Wrapper.m_Player_Swap;
         public InputAction @Test => m_Wrapper.m_Player_Test;
-        public InputAction @ScrolUp => m_Wrapper.m_Player_ScrolUp;
+        public InputAction @PressScrolUp => m_Wrapper.m_Player_PressScrolUp;
+        public InputAction @ReleaseScrolUp => m_Wrapper.m_Player_ReleaseScrolUp;
         public InputAction @Esc => m_Wrapper.m_Player_Esc;
         public InputAction @Pause => m_Wrapper.m_Player_Pause;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -487,9 +531,12 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @Test.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTest;
                 @Test.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTest;
                 @Test.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnTest;
-                @ScrolUp.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnScrolUp;
-                @ScrolUp.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnScrolUp;
-                @ScrolUp.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnScrolUp;
+                @PressScrolUp.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPressScrolUp;
+                @PressScrolUp.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPressScrolUp;
+                @PressScrolUp.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPressScrolUp;
+                @ReleaseScrolUp.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnReleaseScrolUp;
+                @ReleaseScrolUp.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnReleaseScrolUp;
+                @ReleaseScrolUp.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnReleaseScrolUp;
                 @Esc.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnEsc;
                 @Esc.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnEsc;
                 @Esc.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnEsc;
@@ -518,9 +565,12 @@ public class @InputSystem : IInputActionCollection, IDisposable
                 @Test.started += instance.OnTest;
                 @Test.performed += instance.OnTest;
                 @Test.canceled += instance.OnTest;
-                @ScrolUp.started += instance.OnScrolUp;
-                @ScrolUp.performed += instance.OnScrolUp;
-                @ScrolUp.canceled += instance.OnScrolUp;
+                @PressScrolUp.started += instance.OnPressScrolUp;
+                @PressScrolUp.performed += instance.OnPressScrolUp;
+                @PressScrolUp.canceled += instance.OnPressScrolUp;
+                @ReleaseScrolUp.started += instance.OnReleaseScrolUp;
+                @ReleaseScrolUp.performed += instance.OnReleaseScrolUp;
+                @ReleaseScrolUp.canceled += instance.OnReleaseScrolUp;
                 @Esc.started += instance.OnEsc;
                 @Esc.performed += instance.OnEsc;
                 @Esc.canceled += instance.OnEsc;
@@ -566,7 +616,8 @@ public class @InputSystem : IInputActionCollection, IDisposable
         void OnLeft(InputAction.CallbackContext context);
         void OnSwap(InputAction.CallbackContext context);
         void OnTest(InputAction.CallbackContext context);
-        void OnScrolUp(InputAction.CallbackContext context);
+        void OnPressScrolUp(InputAction.CallbackContext context);
+        void OnReleaseScrolUp(InputAction.CallbackContext context);
         void OnEsc(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
     }

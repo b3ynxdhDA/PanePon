@@ -19,6 +19,11 @@ public class PanePonUI : MonoBehaviour
     //パネルが連載中かどうか
     public bool _isSomePanelErasing = false;
 
+    //タイマー
+    private float _timerCount = 0;
+
+    const int ONE_MINUTES = 60;
+
     //ゲームスタートのカウント
     [SerializeField] private Text _startCountText = default;
 
@@ -32,7 +37,10 @@ public class PanePonUI : MonoBehaviour
     [SerializeField] private Text _chainCountText = default;
 
     //ハイスコアテキスト
-    [SerializeField] private Text _highScoreText = default;
+    [SerializeField] private Text _scoreCountText = default;
+
+    //タイマーテキスト
+    [SerializeField] private Text _timerCountText = default;
 
     private void Awake()
     {
@@ -47,7 +55,14 @@ public class PanePonUI : MonoBehaviour
         _chainCountText.text = "" + _chainCount;
 
         //ハイスコアの更新
-        _highScoreText.text = "" + GameManager.instance._highScore;
+        _scoreCountText.text = "" + GameManager.instance._highScore;
+
+        if (GameManager.instance.game_State == GameManager.GameState.GameNow)
+        {
+            //タイマーの更新
+            _timerCount += Time.deltaTime;
+            _timerCountText.text = "" + ((int)_timerCount / ONE_MINUTES).ToString("00") + " : " + ((int)_timerCount % ONE_MINUTES).ToString("00");
+        }
     }
     /// <summary>
     /// カウントダウンコルーチンを開始
