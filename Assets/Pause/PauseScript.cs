@@ -30,6 +30,11 @@ public class PauseScript : MonoBehaviour
         {
             OnPouse();
         }
+
+        if (_inputSystem.Player.Test.triggered)
+        {
+            _pauseUI.SetActive(!_pauseUI.activeSelf);
+        }
     }
     /// <summary>
     /// ポーズUIの表示とゲーム状態の変更
